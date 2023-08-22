@@ -24,24 +24,74 @@ export async function getGenerationName(identifier) {
   const poke = await getSpecies(identifier)
   return poke.generation.name
 }
-export async function getGenerationId(id){
-  const poke = await getFromAPI('generation',id)
+export async function getGenerationId(id) {
+  const poke = await getFromAPI('generation', id)
   return poke.name
 }
-export function checkGeneration(id){
-  if(id > 0){return id}else{"Não há mais gerações"}
+
+
+
+
+
+
+
+
+
+
+
+export function checkGeneration(id) {
+  if (id > 0) {
+    return id
+  } else {
+    ;('Não há mais gerações')
+  }
 }
 export async function getAllPokemonsOfGeneration(generation) {
-  var sprites = []
-  var i 
-  generation = await getGenerationId(generation)
-  for (i = 1; i <= 1009; i++) {
-    if ((await getGenerationName(i)) == generation) {
+  const sprites = []
+  const nameGeneration = await getGenerationId(generation)
+  for (var  i = 1;  i <= 1; i++) {
+    if ((await getGenerationName(i)) == nameGeneration) {
       sprites.push(await getImage(i))
-    }else{break}
+    } else {
+      break
+    }
   }
   return Promise.all(sprites)
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Metódos para evolução do Pokemon//
+export async function getUrlEvolution(identifier) {
+  const poke = await getSpecies(identifier)
+  return poke.evolution_chain
+}
+export async function checkEvolution(pokeid, {url}) {
+  const evolution = await getUrlEvolution(pokeid)
+  if (evolution.url == url) {
+    return 1
+  } else {
+    return 0
+  }
+}
+
 async function getFromAPI(path, identifier) {
   return await fetch(`${BASE_API}/${path}/${identifier}/`, {
     headers: {
