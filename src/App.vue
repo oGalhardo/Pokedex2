@@ -4,50 +4,65 @@
     <br />
     <h6>Digite o Nome do Pokemon e pressione Enter</h6>
     <input type="text" v-model="nome" @keyup.enter="searchPokemon(nome)" />
-    <!-- <div v-if="sprite != ''">
-      <img :src="sprite" alt="Pokemon non existe" />
-      <button @click="attSprite(idPokemo - 1)">Back</button>
-      <br />
-      <button @click="attSprite(idPokemo + 1)">Next</button>
-    </div> -->
-    <div>
-      Selecione a geração de Pokemons
-      <button @click="nextGeneration('generation-i')">Next Generation</button>
-      <button @click="backGeneration">Back Generation</button>
+    <div v-if="objPokemon.id > 0">
+      <img :src="objPokemon.sprite" alt="Pokemon non existe" />
+      <div v-if="objPokemon != ''">
+        <button @click="attSprite(objPokemon.id - 1)">Back</button>
+        <br />
+        <button @click="attSprite(objPokemon.id + 1)">Next</button>
+      </div>
     </div>
     <div>
-      <img v-for="pokeImg in allGenPokemon" :key="pokeImg" :src="pokeImg" alt="Pokemon Sprite" />
+      Selecione a geração de Pokemons
+      <button @click="attGeneration(generationAtual + 1)">Next Generation</button>
+      <button @click="attGeneration(generationAtual - 1)">Back Generation</button>
+    </div>
+    <div v-if="allGenPokemon!=''">
+      <img v-for="poke in allGenPokemon" :key="poke" :src="poke" alt="Pokemon Sprite" />
     </div>
   </div>
 </template>
 <script>
-import { getImage, getPokemon, getIdPokemon, getSpecies, getAllPokemonsOfGeneration } from './api'
+import {
+  getImage,
+  getPokemon,
+  getIdPokemon,
+  getSpecies,
+  getAllPokemonsOfGeneration,
+  getGenerationName,
+  attPokemon,
+  checkGeneration
+} from './api'
 export default {
   name: 'App',
   data() {
     return {
       nome: '',
-      idPokemo: '',
-      objPokemon: '',
-      espPokemon: '',
-      genPokemon: '',
-      allGenPokemon: ['']
+      objPokemon: [{ name: '', id: '', sprite: '', espPokemon: '', genPokemon: '' }],
+      allGenPokemon: [],
+      generationAtual:1
     }
   },
   methods: {
     async searchPokemon(nomePokemon) {
       this.objPokemon = await getPokemon(nomePokemon)
-      this.idPokemo = await getIdPokemon(nomePokemon)
-      this.sprite = await getImage(this.idPokemo)
-      this.espPokemon = await getSpecies(this.idPokemo)
+      this.objPokemon.id = await getIdPokemon(nomePokemon)
+      this.objPokemon.sprite = await getImage(nomePokemon)
+      this.objPokemon.espPokemon = await getSpecies(nomePokemon)
+      this.objPokemon.genPokemon = await getGenerationName(nomePokemon)
     },
     attSprite(id) {
-      this.searchPokemon(id)
+      this.searchPokemon(attPokemon(id))
     },
-    async nextGeneration(gen) {
-      this.allGenPokemon = await getAllPokemonsOfGeneration(gen)
-      console.log(this.genPokemon)
+    async attGeneration(generationAtual){
+      if(checkGeneration(generationAtual)){
+      this.generationAtual = await getAllPokemonsOfGeneration(checkGeneration(generationAtual))
     }
+    }
+  },
+  async mounted() {
+    this.allGenPokemon = await getAllPokemonsOfGeneration(this.generationAtual)
+    console.log(this.allGenPokemon)
   }
 }
 </script>
