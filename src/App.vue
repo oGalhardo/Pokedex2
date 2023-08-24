@@ -6,30 +6,33 @@
     <input type="text" v-model="nome" @keyup.enter="searchPokemon(nome)" />
     <div v-if="objPokemon.id > 0">
       <img :src="objPokemon.sprites.front_default" alt="Pokemon non existe" />
-        <button @click="attSprite(objPokemon.id - 1)">Back</button>
-        <button @click="attSprite(objPokemon.id + 1)">Next</button>
-        <button @click="attEvolution(objPokemon.id - 1)">Involuir</button>
-        <button @click="attEvolution(objPokemon.id + 1)">Evoluir</button>
-      </div>
-      <div v-else>
-        Carregando Geração de Pokemons...
-      </div>
-      <div v-if="allGenPokemon != ''">
+      <button @click="attSprite(objPokemon.id, parseInt(idEvolutionChain) - 1)">Back</button>
+      <button @click="attSprite(objPokemon.id, parseInt(idEvolutionChain) + 1)">Next</button>
+      <button @click="attSprite(objPokemon.id - 1, urlEvolution)">Involuir</button>
+      <button @click="attSprite(objPokemon.id + 1, urlEvolution)">Evoluir</button>
+    </div>
+    <div v-else>Waiting Pokemon...</div>
+    <div v-if="allGenPokemon != ''">
       Selecione a geração de Pokemons
-      <button @click="attGeneration(generationAtual + 1)">Next Generation</button>
-      <button @click="attGeneration(generationAtual - 1)">Back Generation</button>
+      <button @click="attGeneration(idGen + 1)">Next Generation</button>
+      <button @click="attGeneration(idGen - 1)">Back Generation</button>
       <img v-for="poke in allGenPokemon" :key="poke" :src="poke" alt="Pokemon Sprite" />
-      </div>
+    </div>
+    <div v-else>Loading Generation...</div>
   </div>
 </template>
 <script>
 import {
   getPokemon,
   attPokemon,
-  checkEvolution,
-  getSpecies,
+  getIdEvolutionChain,
+  getUrlEvolution,
+  getPokemonsOfGeneration,
   checkGeneration,
-  getAllPokemonsOfGeneration
+  checkId,
+  getObjEvolution,
+  getEvolutionNames
+  
 } from './api'
 export default {
   name: 'App',
@@ -37,41 +40,46 @@ export default {
     return {
       nome: '',
       objPokemon: '',
-      objPokemonSpecies: '',
-      generationAtual: 1 ,
-      allGenPokemon: []
+      urlEvolution: '',
+      allGenPokemon: [],
+      idEvolutionChain: '',
+      idGen: 1,
+      evo:'',
+      evo2:''
     }
   },
   methods: {
     async searchPokemon(nomePokemon) {
-      this.objPokemon = await getPokemon(nomePokemon)
-      this.objPokemonSpecies = await getSpecies(nomePokemon)
-    },
-    attSprite(id) {
-      this.searchPokemon(attPokemon(id))
-    },
-    async attGeneration(generation) {
-      if (checkGeneration(generation)) {
-        this.generationAtual = await getAllPokemonsOfGeneration(checkGeneration(generation))
+      if (checkId(nomePokemon)) {
+        this.objPokemon = await getPokemon(nomePokemon)
+        this.urlEvolution = await getUrlEvolution(nomePokemon)
+        this.idEvolutionChain = getIdEvolutionChain(this.urlEvolution)
+        this.evo = await getObjEvolution(1)
+        this.evo2 = await getEvolutionNames(this.evo)
+        console.log(this.evo2)
+      } else {
+        alert('Non Existe esse pokemon')
       }
     },
-
-
-
-    async attEvolution(id) {
-      if (await checkEvolution(id, this.objPokemonSpecies.evolution_chain)) {
-        this.searchPokemon(id)
-      }else{alert("Tal pokemon não tem mais evoluções")}
+    async attSprite(id, url) {
+      if (checkId(id) && checkId(url)) {
+        this.searchPokemon(await attPokemon(id, url))
+      } else {
+        alert('Non existe este Pokemon')
+      }
+    },
+    async attGeneration(gen) {
+      if (checkGeneration(gen)) {
+        this.idGen = gen
+        this.allGenPokemon = []
+        this.allGenPokemon = await getPokemonsOfGeneration(gen)
+      } else {
+        alert('Non existe esta geração')
+      }
     }
   },
-
-
-
-
-  
   async beforeMount() {
-    this.allGenPokemon = await getAllPokemonsOfGeneration(this.generationAtual)
-    console.log(this.generationAtual)
+    this.allGenPokemon = await getPokemonsOfGeneration(this.idGen)
   }
 }
 </script>
