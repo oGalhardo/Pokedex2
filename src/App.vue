@@ -6,10 +6,10 @@
     <input type="text" v-model="nome" @keyup.enter="searchPokemon(nome)" />
     <div v-if="objPokemon.id > 0">
       <img :src="objPokemon.sprites.front_default" alt="Pokemon non existe" />
-      <button @click="attSprite(objPokemon.id, parseInt(idEvolutionChain) - 1)">Back</button>
-      <button @click="attSprite(objPokemon.id, parseInt(idEvolutionChain) + 1)">Next</button>
-      <button @click="attSprite(objPokemon.id - 1, urlEvolution)">Involuir</button>
-      <button @click="attSprite(objPokemon.id + 1, urlEvolution)">Evoluir</button>
+      <button @click="attPoke(objPokemon.id -1)">Back</button>
+      <button @click="attPoke(objPokemon.id +1)">Next</button>
+      <button @click="attEvo(objPokemon.id - 1, evoChain)">Involuir</button>
+      <button @click="attEvo(objPokemon.id + 1, evoChain)">Evoluir</button>
     </div>
     <div v-else>Waiting Pokemon...</div>
     <div v-if="allGenPokemon != ''">
@@ -24,15 +24,15 @@
 <script>
 import {
   getPokemon,
-  attPokemon,
-  getIdEvolutionChain,
-  getUrlEvolution,
   getPokemonsOfGeneration,
   checkGeneration,
   checkId,
-  getObjEvolution,
-  getEvolutionNames
-  
+  evolutionChain,
+  getUrlEvolution,
+  getIdEvolutionChain,
+  searchPoke,
+  searchEvo
+
 } from './api'
 export default {
   name: 'App',
@@ -40,34 +40,35 @@ export default {
     return {
       nome: '',
       objPokemon: '',
-      urlEvolution: '',
       allGenPokemon: [],
-      idEvolutionChain: '',
+      evoChain: [],
       idGen: 1,
-      evo:'',
-      evo2:''
+      urlEvo: '',
+      idEvo: '',
     }
   },
   methods: {
     async searchPokemon(nomePokemon) {
       if (checkId(nomePokemon)) {
         this.objPokemon = await getPokemon(nomePokemon)
-        this.urlEvolution = await getUrlEvolution(nomePokemon)
-        this.idEvolutionChain = getIdEvolutionChain(this.urlEvolution)
-        this.evo = await getObjEvolution(1)
-        this.evo2 = await getEvolutionNames(this.evo)
-        console.log(this.evo2)
+        this.evoChain = await evolutionChain(nomePokemon)
+        this.urlEvo = await getUrlEvolution(nomePokemon)
+        this.idEvo = await getIdEvolutionChain(this.urlEvo)
       } else {
         alert('Non Existe esse pokemon')
-      }
+      }''
     },
-    async attSprite(id, url) {
-      if (checkId(id) && checkId(url)) {
-        this.searchPokemon(await attPokemon(id, url))
-      } else {
-        alert('Non existe este Pokemon')
-      }
+    async attEvo(id, evos) {
+      if(await searchEvo(id,evos)){
+        this.searchPokemon(await searchEvo(id,evos))
+      }else{return alert("Non ha mais evolucoes")}
     },
+    async attPoke(id){
+      if(await searchPoke(id)){
+        searchPoke(id)
+      }else{return alert("Non ha mais pokemons")}
+    },
+
     async attGeneration(gen) {
       if (checkGeneration(gen)) {
         this.idGen = gen

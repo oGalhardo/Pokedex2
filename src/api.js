@@ -11,6 +11,10 @@ export async function getIdPokemon(identifier) {
   const poke = await getPokemon(identifier)
   return poke.id
 }
+export async function getNamePokemon(identifier) {
+  const poke = await getPokemon(identifier)
+  return poke.name
+}
 //Metódos Species
 export async function getSpecies(identifier) {
   return await getFromAPI('pokemon-species', identifier)
@@ -53,6 +57,12 @@ export async function getNameEvolutionChain(identifier) {
   const poke = await getObjEvolution(identifier)
   return poke.chain.species.name
 }
+export async function getObjEvolutionForNomepoke(nomePoke) {
+  const pokeUrlEvo = await getUrlEvolution(nomePoke)
+  const pokeIdEvo = await getIdEvolutionChain(pokeUrlEvo)
+  const pokeObjEvo = await getObjEvolution(pokeIdEvo)
+  return pokeObjEvo
+}
 //Metódos de verificação
 export function checkGeneration(id) {
   if (id < 1 || id > 9) {
@@ -68,49 +78,20 @@ export function checkId(id) {
     return 1
   }
 }
-//Socorro
-export function getEvolutionNames(evolutionData) {
-  const evolutionNames = [];
+//Metódos para complexo da Pokedex//
+export async function evolutionChain(evolutionData) {
+  const evoObj = await getObjEvolutionForNomepoke(evolutionData)
+  const evolutionNames = []
   function traverseEvolutions(data) {
-    evolutionNames.push(data.species.name);
+    evolutionNames.push(data.species.name)
     if (data.evolves_to.length > 0) {
-      data.evolves_to.forEach(traverseEvolutions);
+      data.evolves_to.forEach(traverseEvolutions)
     }
   }
-
-  traverseEvolutions(evolutionData.chain);
-
-  return evolutionNames;
+  traverseEvolutions(evoObj.chain)
+  return evolutionNames
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//Metódos para complexo da Pokedex//
 export async function getPokemonsOfGeneration(gen) {
   const sprites = []
   const quantArrayGen = await getGenerationQuant(gen)
@@ -119,17 +100,18 @@ export async function getPokemonsOfGeneration(gen) {
   }
   return Promise.all(sprites)
 }
-
-export async function attPokemon(pokeid, url) {
-  const evolution = await getUrlEvolution(pokeid)
-  if (evolution == url) {
-    return pokeid
-  } else {
-    const namepoke = await getNameEvolutionChain(url)
-    return namepoke
+export async function searchEvo(id, evos){
+  const nomePokemon = await getNamePokemon(id)
+  if(evos.indexOf(i => i === nomePokemon)){
+    return id
+  }
+  else{ return 0} 
+}
+export async function searchPoke(idEvo){ 
+  if(idEvo>0 && idEvo < 530){
+    return await getNameEvolutionChain(idEvo)
   }
 }
-
 async function getFromAPI(path, identifier) {
   return await fetch(`${BASE_API}/${path}/${identifier}/`, {
     headers: {
