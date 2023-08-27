@@ -72,7 +72,14 @@ export function checkGeneration(id) {
   }
 }
 export function checkId(id) {
-  if (id > 1008 || id < 1) {
+  if (id < 1009 || id > 1 || typeof id === 'string') {
+    return 1
+  } else {
+    return 0
+  }
+}
+export function checkEvo(evo) {
+  if (evo > 530 || evo < 1) {
     return 0
   } else {
     return 1
@@ -91,6 +98,18 @@ export async function evolutionChain(evolutionData) {
   traverseEvolutions(evoObj.chain)
   return evolutionNames
 }
+export async function getAttPokemon(poke, option) {
+  if (typeof option === 'object') {
+    if (poke >= 0 || poke < option.length) {
+      return option[poke]
+    } else if (poke == undefined) {
+      return 0
+    }
+  } else {
+    const pokeAtt = await getNameEvolutionChain(option)
+    return pokeAtt
+  }
+}
 
 export async function getPokemonsOfGeneration(gen) {
   const sprites = []
@@ -100,18 +119,7 @@ export async function getPokemonsOfGeneration(gen) {
   }
   return Promise.all(sprites)
 }
-export async function searchEvo(id, evos){
-  const nomePokemon = await getNamePokemon(id)
-  if(evos.indexOf(i => i === nomePokemon)){
-    return id
-  }
-  else{ return 0} 
-}
-export async function searchPoke(idEvo){ 
-  if(idEvo>0 && idEvo < 530){
-    return await getNameEvolutionChain(idEvo)
-  }
-}
+
 async function getFromAPI(path, identifier) {
   return await fetch(`${BASE_API}/${path}/${identifier}/`, {
     headers: {

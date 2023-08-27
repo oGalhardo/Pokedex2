@@ -6,11 +6,12 @@
     <input type="text" v-model="nome" @keyup.enter="searchPokemon(nome)" />
     <div v-if="objPokemon.id > 0">
       <img :src="objPokemon.sprites.front_default" alt="Pokemon non existe" />
-      <button @click="attPoke(objPokemon.id -1)">Back</button>
-      <button @click="attPoke(objPokemon.id +1)">Next</button>
-      <button @click="attEvo(objPokemon.id - 1, evoChain)">Involuir</button>
-      <button @click="attEvo(objPokemon.id + 1, evoChain)">Evoluir</button>
+      <button @click="attPoke(objPokemon.id, parseInt(idEvo) - 1)">Back</button>
+      <button @click="attPoke(objPokemon.id, parseInt(idEvo) + 1)">Next</button>
+      <button @click="attPoke(parseInt(idPokeInEvo) - 1, evoChain)">Involuir</button>
+      <button @click="attPoke(parseInt(idPokeInEvo) + 1, evoChain)">Evoluir</button>
     </div>
+
     <div v-else>Waiting Pokemon...</div>
     <div v-if="allGenPokemon != ''">
       Selecione a geração de Pokemons
@@ -26,13 +27,12 @@ import {
   getPokemon,
   getPokemonsOfGeneration,
   checkGeneration,
-  checkId,
   evolutionChain,
   getUrlEvolution,
   getIdEvolutionChain,
-  searchPoke,
-  searchEvo
-
+  getAttPokemon,
+  checkEvo,
+  checkId
 } from './api'
 export default {
   name: 'App',
@@ -45,6 +45,7 @@ export default {
       idGen: 1,
       urlEvo: '',
       idEvo: '',
+      idPokeInEvoo: ''
     }
   },
   methods: {
@@ -52,23 +53,11 @@ export default {
       if (checkId(nomePokemon)) {
         this.objPokemon = await getPokemon(nomePokemon)
         this.evoChain = await evolutionChain(nomePokemon)
+        this.idPokeInEvo = this.evoChain.indexOf(this.objPokemon.name)
         this.urlEvo = await getUrlEvolution(nomePokemon)
         this.idEvo = await getIdEvolutionChain(this.urlEvo)
-      } else {
-        alert('Non Existe esse pokemon')
-      }''
+      }else{alert("Non existe tal pokemon meu parça")}
     },
-    async attEvo(id, evos) {
-      if(await searchEvo(id,evos)){
-        this.searchPokemon(await searchEvo(id,evos))
-      }else{return alert("Non ha mais evolucoes")}
-    },
-    async attPoke(id){
-      if(await searchPoke(id)){
-        searchPoke(id)
-      }else{return alert("Non ha mais pokemons")}
-    },
-
     async attGeneration(gen) {
       if (checkGeneration(gen)) {
         this.idGen = gen
@@ -77,6 +66,15 @@ export default {
       } else {
         alert('Non existe esta geração')
       }
+    },
+    async attPoke(poke, option) {
+      if (checkEvo(option)) {
+        if (await getAttPokemon(poke, option)) {
+          this.searchPokemon(await getAttPokemon(poke, option))
+        } else {
+          alert('Non ha mais evo')
+        }
+      }else{alert("Non ha mais pokemon")}
     }
   },
   async beforeMount() {
@@ -84,4 +82,3 @@ export default {
   }
 }
 </script>
-.section
