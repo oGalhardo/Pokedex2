@@ -1,26 +1,55 @@
 <template>
   <div>
-    <h1>Pokedex</h1>
+    FAZER EXIBIR MENSAGEM DE ERRO NO LED PRETO ONDE PESQUISA O POKEMON AO INVÉS DA PÁGINA DISPARAR O ALERTA
     <br />
-    <img src="../public/img/Pok_dex_Kanto_1.png" class="pokedex">
-    <h6>Digite o Nome do Pokemon e pressione Enter</h6>
-    <input type="text" v-model="nome" @keyup.enter="searchPokemon(nome)" />
-    <div v-if="objPokemon.id > 0">
-      <img :src="objPokemon.sprites.front_default" alt="Pokemon non existe" class="pokemon" />
-      <button @click="attPoke(objPokemon.id, parseInt(idEvo) - 1)">Back</button>
-      <button @click="attPoke(objPokemon.id, parseInt(idEvo) + 1)">Next</button>
-      <button @click="attPoke(parseInt(idPokeInEvo) - 1, evoChain)">Involuir</button>
-      <button @click="attPoke(parseInt(idPokeInEvo) + 1, evoChain)">Evoluir</button>
+    <button class="buttonOn" @click="pokedexOn(1)" v-if="open != 1"></button>
+    <button class="buttonOff" @click="pokedexOn(0)" v-else></button>
+  </div>
+  <div class="flex" v-if="open != 0">
+    <div class="searchPoke">
+      <div class="pokedex">
+        <img src="../public/img/Pok_dex_Kanto_1.png" />
+      </div>
+      <div class="searchPokeMenu">
+        <h6>Digite o Nome do Pokemon</h6>
+        <br />
+        <input type="text" v-model="nome" @keyup.enter="searchPokemon(nome)" />
+      </div>
+      <div class="pokeInPokedex" v-if="objPokemon.id > 0">
+        <div class="pokemon">
+          <img
+            :src="objPokemon.sprites.front_default"
+            alt="Pokemon non existe"
+            class="imgPokemon"
+          />
+        </div>
+        <button @click="attPoke(objPokemon.id, parseInt(idEvo) - 1)" class="buttonBack"></button>
+        <button @click="attPoke(objPokemon.id, parseInt(idEvo) + 1)" class="buttonNext"></button>
+        <button
+          @click="attPoke(parseInt(idPokeInEvo) - 1, evoChain)"
+          class="buttonInvolue"
+        ></button>
+        <button @click="attPoke(parseInt(idPokeInEvo) + 1, evoChain)" class="buttonEvolue"></button>
+      </div>
+      <div v-else></div>
     </div>
-
-    <div v-else>Waiting Pokemon...</div>
-    <div v-if="allGenPokemon != ''">
-      Selecione a geração de Pokemons
+    <div class="pokeGen">
       <button @click="attGeneration(idGen + 1)">Next Generation</button>
-      <button @click="attGeneration(idGen - 1)">Back Generation</button>
-      <img v-for="poke in allGenPokemon" :key="poke" :src="poke" alt="Pokemon Sprite" />
+        <button @click="attGeneration(idGen - 1)">Back Generation</button>
+      <div v-if="allGenPokemon != ''">
+        <img
+          v-for="poke in allGenPokemon"
+          :key="poke"
+          :src="poke"
+          alt="Pokemon Sprite"
+          class="pokeInGen"
+        />
+      </div>
+      <div v-else>Loading Generation...</div>
     </div>
-    <div v-else>Loading Generation...</div>
+  </div>
+  <div v-else>
+    <img src="../public/img/Kanto_Pok_dex_Infobox.png" />
   </div>
 </template>
 <script>
@@ -46,18 +75,22 @@ export default {
       idGen: 1,
       urlEvo: '',
       idEvo: '',
-      idPokeInEvoo: ''
+      idPokeInEvoo: '',
+      open: 0
     }
   },
   methods: {
     async searchPokemon(nomePokemon) {
+      this.nome = ''
       if (checkId(nomePokemon)) {
         this.objPokemon = await getPokemon(nomePokemon)
         this.evoChain = await evolutionChain(nomePokemon)
         this.idPokeInEvo = this.evoChain.indexOf(this.objPokemon.name)
         this.urlEvo = await getUrlEvolution(nomePokemon)
         this.idEvo = await getIdEvolutionChain(this.urlEvo)
-      }else{alert("Non existe tal pokemon meu parça")}
+      } else {
+        alert('Non existe tal pokemon meu parça')
+      }
     },
     async attGeneration(gen) {
       if (checkGeneration(gen)) {
@@ -65,17 +98,25 @@ export default {
         this.allGenPokemon = []
         this.allGenPokemon = await getPokemonsOfGeneration(gen)
       } else {
-        alert('Non existe esta geração')
+        this
       }
     },
     async attPoke(poke, option) {
+      this.nome = ' '
       if (checkEvo(option)) {
         if (await getAttPokemon(poke, option)) {
           this.searchPokemon(await getAttPokemon(poke, option))
         } else {
           alert('Non ha mais evo')
         }
-      }else{alert("Non ha mais pokemon")}
+      } else {
+        alert('Non ha mais pokemon')
+      }
+    },
+    pokedexOn(num) {
+      this.open = num
+      this.objPokemon = ''
+      this.nome = ''
     }
   },
   async beforeMount() {
@@ -84,16 +125,99 @@ export default {
 }
 </script>
 <style>
-.pokedex {
-  color: red;
-  width: 530px;
-  bottom: 100px;
+.pokeInGen {
+  width: 120px;
+  height: 120px;
 }
-.pokemon{
-  color: red;
-  width: 150px;
-  position: absolute;
-  bottom: 645px;
-  left: 375px;
+.pokeGen {
+  overflow-y: scroll;
+  width: 750px;
+  height: 500px;
+  object-position: left top;
+  border: 2px solid black;
+}
+.pokemon {
+  position: relative;
+  top: -360px;
+  right: -140px;
+}
+.imgPokemon {
+  width: 100px;
+  height: 100px;
+}
+.flex {
+  display: flex;
+}
+.buttonBack {
+  background: transparent;
+  position: relative;
+  top: -285px;
+  right: -225px;
+  height: 25px;
+  width: 25px;
+  border: none;
+}
+.buttonNext {
+  background: transparent;
+  position: relative;
+  top: -285px;
+  right: -250px;
+  height: 25px;
+  width: 25px;
+  border: none;
+}
+.buttonEvolue {
+  background: transparent;
+  position: relative;
+  top: -310px;
+  right: -175px;
+  height: 25px;
+  width: 25px;
+  border: none;
+}
+.buttonInvolue {
+  background: transparent;
+  position: relative;
+  top: -260px;
+  right: -200px;
+  height: 25px;
+  width: 25px;
+  border: none;
+}
+h6 {
+  display: inline;
+  font-size: 15px;
+  font-weight: 700;
+  color: green;
+}
+input {
+  height: 25px;
+  width: 100px;
+  background: transparent;
+  color: green;
+}
+.searchPokeMenu {
+  display: inline;
+  position: relative;
+  top: -350px;
+  right: -415px;
+}
+.buttonOff {
+  position: relative;
+  top: 360px;
+  right: -90px;
+  height: 25px;
+  width: 25px;
+  background: transparent;
+  border: none;
+}
+.buttonOn {
+  background: transparent;
+  position: relative;
+  top: 270px;
+  right: -540px;
+  height: 40px;
+  width: 30px;
+  border: none;
 }
 </style>
