@@ -2,10 +2,11 @@
   <div>
     <h1>Pokedex</h1>
     <br />
+    <img src="../public/img/Pok_dex_Kanto_1.png" class="pokedex">
     <h6>Digite o Nome do Pokemon e pressione Enter</h6>
     <input type="text" v-model="nome" @keyup.enter="searchPokemon(nome)" />
     <div v-if="objPokemon.id > 0">
-      <img :src="objPokemon.sprites.front_default" alt="Pokemon non existe" />
+      <img :src="objPokemon.sprites.front_default" alt="Pokemon non existe" class="pokemon" />
       <button @click="attPoke(objPokemon.id, parseInt(idEvo) - 1)">Back</button>
       <button @click="attPoke(objPokemon.id, parseInt(idEvo) + 1)">Next</button>
       <button @click="attPoke(parseInt(idPokeInEvo) - 1, evoChain)">Involuir</button>
@@ -82,3 +83,17 @@ export default {
   }
 }
 </script>
+<style>
+.pokedex {
+  color: red;
+  width: 530px;
+  bottom: 100px;
+}
+.pokemon{
+  color: red;
+  width: 150px;
+  position: absolute;
+  bottom: 645px;
+  left: 375px;
+}
+</style>
