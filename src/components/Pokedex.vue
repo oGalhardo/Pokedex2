@@ -1,9 +1,11 @@
 <template>
   <div>
+    <button class="buttonOn" @click="pokedexOn(1)" v-if="open != 1"></button>
+    <button class="buttonOff" @click="pokedexOn(0)" v-else></button>
     <div class="flex" v-if="open != 0">
       <div class="searchPoke">
         <div class="pokedex">
-          <img src="../public/img/Pok_dex_Kanto_1.png" />
+          <img src="../../public/img/Pok_dex_Kanto_1.png" />
         </div>
         <div class="searchPokeMenu">
           <h6 id="msg">Digite o Nome do Pokemon</h6>
@@ -31,9 +33,10 @@
         </div>
         <div v-else></div>
       </div>
+      <GenerationVue class="clasGen" v-bind:num="open" />
     </div>
     <div v-else>
-      <img src="../public/img/Kanto_Pok_dex_Infobox.png" />
+      <img src="../../public/img/Kanto_Pok_dex_Infobox.png" />
     </div>
   </div>
 </template>
@@ -46,9 +49,11 @@ import {
   getAttPokemon,
   checkEvo,
   checkId
-} from './api'
+} from '../api'
+import GenerationVue from './Generation.vue'
 export default {
   name: 'App',
+  props: ['num'],
   data() {
     return {
       nome: '',
@@ -62,12 +67,18 @@ export default {
       open: 0
     }
   },
+  components: {
+    GenerationVue
+  },
   methods: {
+    pokedexOn(n) {
+      this.open = n
+    },
     async searchPokemon(nomePokemon) {
       this.nome = ''
       if (checkId(nomePokemon)) {
         this.objPokemon = await getPokemon(nomePokemon)
-        this.evoChain = await evolutionChain(nomePokemon)
+        this.evoChain = await evolutionChain(this.objPokemon.id)
         this.idPokeInEvo = this.evoChain.indexOf(this.objPokemon.name)
         this.urlEvo = await getUrlEvolution(nomePokemon)
         this.idEvo = await getIdEvolutionChain(this.urlEvo)
@@ -86,27 +97,11 @@ export default {
       } else {
         alert('Non ha mais pokemon')
       }
-    },
-    pokedexOn(num) {
-      this.open = num
-      this.objPokemon = ''
-      this.nome = ''
     }
   }
 }
 </script>
 <style>
-.pokeInGen {
-  width: 120px;
-  height: 120px;
-}
-.pokeGen {
-  overflow-y: scroll;
-  width: 750px;
-  height: 500px;
-  object-position: left top;
-  border: 2px solid black;
-}
 .pokemon {
   position: relative;
   top: -360px;
@@ -175,20 +170,22 @@ input {
 }
 .buttonOff {
   position: relative;
-  top: 360px;
-  right: -90px;
-  height: 25px;
-  width: 25px;
+  top: 420px;
+  right: -50px;
+  height: 50px;
+  width: 50px;
   background: transparent;
   border: none;
+  border-radius: 25px;
 }
 .buttonOn {
-  background: transparent;
   position: relative;
-  top: 270px;
-  right: -540px;
-  height: 40px;
-  width: 30px;
+  top: 340px;
+  right: -70px;
+  height: 50px;
+  width: 50px;
+  background: transparent;
   border: none;
+  border-radius: 25px;
 }
 </style>
