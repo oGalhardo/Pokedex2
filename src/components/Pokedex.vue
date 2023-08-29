@@ -1,11 +1,11 @@
 <template>
   <div>
-    <button class="buttonOn" @click="pokedexOn(1)" v-if="open != 1"></button>
+  <button class="buttonOn" @click="pokedexOn(1)" v-if="open != 1"></button>
     <button class="buttonOff" @click="pokedexOn(0)" v-else></button>
     <div class="flex" v-if="open != 0">
       <div class="searchPoke">
         <div class="pokedex">
-          <img src="../../public/img/Pok_dex_Kanto_1.png" />
+          <img src="../../public/img/Pok_dex_Kanto_1.png"/>
         </div>
         <div class="searchPokeMenu">
           <h6 id="msg">Digite o Nome do Pokemon</h6>
@@ -33,7 +33,7 @@
         </div>
         <div v-else></div>
       </div>
-      <GenerationVue class="clasGen" v-bind:num="open" />
+      <GenerationVue class="clasGen" v-bind:num="open"/>
     </div>
     <div v-else>
       <img src="../../public/img/Kanto_Pok_dex_Infobox.png" />
@@ -53,7 +53,7 @@ import {
 import GenerationVue from './Generation.vue'
 export default {
   name: 'App',
-  props: ['num'],
+  props:['num'],
   data() {
     return {
       nome: '',
@@ -67,7 +67,7 @@ export default {
       open: 0
     }
   },
-  components: {
+  components:{
     GenerationVue
   },
   methods: {
@@ -78,7 +78,7 @@ export default {
       this.nome = ''
       if (checkId(nomePokemon)) {
         this.objPokemon = await getPokemon(nomePokemon)
-        this.evoChain = await evolutionChain(this.objPokemon.id)
+        this.evoChain = await evolutionChain(nomePokemon)
         this.idPokeInEvo = this.evoChain.indexOf(this.objPokemon.name)
         this.urlEvo = await getUrlEvolution(nomePokemon)
         this.idEvo = await getIdEvolutionChain(this.urlEvo)
@@ -86,6 +86,7 @@ export default {
         alert('Non existe tal pokemon meu parça')
       }
     },
+    
     async attPoke(poke, option) {
       this.nome = ' '
       if (checkEvo(option)) {
@@ -97,7 +98,8 @@ export default {
       } else {
         alert('Non ha mais pokemon')
       }
-    }
+    },
+    
   }
 }
 </script>
@@ -174,9 +176,10 @@ input {
   right: -50px;
   height: 50px;
   width: 50px;
-  background: transparent;
+  background:transparent;
   border: none;
   border-radius: 25px;
+
 }
 .buttonOn {
   position: relative;
@@ -184,7 +187,7 @@ input {
   right: -70px;
   height: 50px;
   width: 50px;
-  background: transparent;
+  background:transparent;
   border: none;
   border-radius: 25px;
 }
