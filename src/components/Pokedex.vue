@@ -1,42 +1,37 @@
 <template>
   <div>
-  <button class="buttonOn" @click="pokedexOn(1)" v-if="open != 1"></button>
+    <button class="buttonOn" @click="pokedexOn(1)" v-if="open != 1"></button>
     <button class="buttonOff" @click="pokedexOn(0)" v-else></button>
-    <div class="flex" v-if="open != 0">
-      <div class="searchPoke">
-        <div class="pokedex">
-          <img src="../../public/img/Pok_dex_Kanto_1.png"/>
-        </div>
+    <div class="dexGen" v-if="open != 0">
+      <div class="pokedex">
+        <img src="../../public/img/Pok_dex_Kanto_1.png" />
         <div class="searchPokeMenu">
-          <h6 id="msg">Digite o Nome do Pokemon</h6>
+          <p id="msg">Digite o Nome do Pokemon</p>
           <br />
           <input type="text" v-model="nome" @keyup.enter="searchPokemon(nome)" />
         </div>
-        <div class="pokeInPokedex" v-if="objPokemon.id > 0">
-          <div class="pokemon">
+        <div class="pokemon">
+          <div v-if="objPokemon.id > 0">
             <img
               :src="objPokemon.sprites.front_default"
               alt="Pokemon non existe"
               class="imgPokemon"
             />
           </div>
-          <button @click="attPoke(objPokemon.id, parseInt(idEvo) - 1)" class="buttonBack"></button>
-          <button @click="attPoke(objPokemon.id, parseInt(idEvo) + 1)" class="buttonNext"></button>
-          <button
-            @click="attPoke(parseInt(idPokeInEvo) - 1, evoChain)"
-            class="buttonInvolue"
-          ></button>
-          <button
-            @click="attPoke(parseInt(idPokeInEvo) + 1, evoChain)"
-            class="buttonEvolue"
-          ></button>
+          <p class="errorMsg" v-else></p>
         </div>
-        <div v-else></div>
+        <button @click="attPoke(objPokemon.id, parseInt(idEvo) - 1)" class="buttonBack"></button>
+        <button @click="attPoke(objPokemon.id, parseInt(idEvo) + 1)" class="buttonNext"></button>
+        <button
+          @click="attPoke(parseInt(idPokeInEvo) - 1, evoChain)"
+          class="buttonInvolue"
+        ></button>
+        <button @click="attPoke(parseInt(idPokeInEvo) + 1, evoChain)" class="buttonEvolue"></button>
       </div>
-      <GenerationVue class="clasGen" v-bind:num="open"/>
+      <GenerationVue class="clasGen" v-bind:num="open" />
     </div>
     <div v-else>
-      <img src="../../public/img/Kanto_Pok_dex_Infobox.png" />
+      <img src="../../public/img/Kanto_Pok%3Fdex_Infobox-PhotoRoom.png-PhotoRoom.png" />
     </div>
   </div>
 </template>
@@ -53,21 +48,20 @@ import {
 import GenerationVue from './Generation.vue'
 export default {
   name: 'App',
-  props:['num'],
+  props: ['num'],
   data() {
     return {
       nome: '',
       objPokemon: '',
       allGenPokemon: [],
       evoChain: [],
-      idGen: 1,
       urlEvo: '',
       idEvo: '',
       idPokeInEvoo: '',
-      open: 0
+      open: 0,
     }
   },
-  components:{
+  components: {
     GenerationVue
   },
   methods: {
@@ -78,28 +72,31 @@ export default {
       this.nome = ''
       if (checkId(nomePokemon)) {
         this.objPokemon = await getPokemon(nomePokemon)
-        this.evoChain = await evolutionChain(nomePokemon)
-        this.idPokeInEvo = this.evoChain.indexOf(this.objPokemon.name)
-        this.urlEvo = await getUrlEvolution(nomePokemon)
-        this.idEvo = await getIdEvolutionChain(this.urlEvo)
+        await this.infoPlus(this.objPokemon.id, this.objPokemon.name)
       } else {
-        alert('Non existe tal pokemon meu parça')
+        const errorMsgElement = document.querySelector(".errorMsg");
+        errorMsgElement.textContent = "Não existe esse pokemon";
       }
     },
-    
+    async infoPlus(id, name) {
+      this.evoChain = await evolutionChain(id)
+      this.idPokeInEvo = this.evoChain.indexOf(name)
+      this.urlEvo = await getUrlEvolution(id)
+      this.idEvo = await getIdEvolutionChain(this.urlEvo)
+    },
     async attPoke(poke, option) {
       this.nome = ' '
       if (checkEvo(option)) {
         if (await getAttPokemon(poke, option)) {
           this.searchPokemon(await getAttPokemon(poke, option))
         } else {
-          alert('Non ha mais evo')
-        }
+          const errorMsgElement = document.querySelector(".errorMsg");
+          errorMsgElement.textContent = "Não há mais evoluções";        }
       } else {
-        alert('Non ha mais pokemon')
+        const errorMsgElement = document.querySelector(".errorMsg");
+        errorMsgElement.textContent = "Não há pokemon pokemon";
       }
-    },
-    
+    }
   }
 }
 </script>
@@ -113,9 +110,18 @@ export default {
   width: 100px;
   height: 100px;
 }
-.flex {
-  display: flex;
+.errorMsg {
+  color: rgb(12, 215, 12);
+  font-size: 15px;
+  font-weight: 700;
+  widows: 40px
+  ;
 }
+.dexGen {
+  display: flex;
+  
+}
+
 .buttonBack {
   background: transparent;
   position: relative;
@@ -152,34 +158,42 @@ export default {
   width: 25px;
   border: none;
 }
-h6 {
+p {
   display: inline;
   font-size: 15px;
   font-weight: 700;
-  color: green;
+  color: rgb(12, 215, 12);
+  transform: rotate(10deg);
+  
+
 }
 input {
+  display: inline;
   height: 25px;
   width: 100px;
   background: transparent;
-  color: green;
+  color: rgb(12, 215, 12);
+  
 }
 .searchPokeMenu {
-  display: inline;
   position: relative;
-  top: -350px;
+  top: -360px;
   right: -415px;
+  font-size: 15px;
+  color: rgb(12, 215, 12);
+  width: 200px;
+  transform: rotate(-2.6deg);
 }
 .buttonOff {
   position: relative;
-  top: 420px;
+  background: black;
   right: -50px;
+  top: 425px;
+  border-radius: 25px;
   height: 50px;
   width: 50px;
-  background:transparent;
+  background: transparent;
   border: none;
-  border-radius: 25px;
-
 }
 .buttonOn {
   position: relative;
@@ -187,7 +201,7 @@ input {
   right: -70px;
   height: 50px;
   width: 50px;
-  background:transparent;
+  background: transparent;
   border: none;
   border-radius: 25px;
 }

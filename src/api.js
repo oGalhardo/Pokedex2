@@ -7,10 +7,6 @@ export async function getImage(identifier) {
   const poke = await getPokemon(identifier)
   return poke.sprites.front_default
 }
-export async function getIdPokemon(identifier) {
-  const poke = await getPokemon(identifier)
-  return poke.id
-}
 export async function getNamePokemon(identifier) {
   const poke = await getPokemon(identifier)
   return poke.name
@@ -18,10 +14,6 @@ export async function getNamePokemon(identifier) {
 //Metódos Species
 export async function getSpecies(identifier) {
   return await getFromAPI('pokemon-species', identifier)
-}
-export async function getSpeciesName(identifier) {
-  const poke = await getSpecies(identifier)
-  return poke.generation.name
 }
 export async function getUrlEvolution(identifier) {
   const poke = await getSpecies(identifier)
@@ -72,19 +64,26 @@ export function checkGeneration(id) {
   }
 }
 export function checkId(id) {
-  if (id < 1009 || id > 1 || typeof id === 'string') {
-    return 1
-  } else {
+  const parsedId = +id 
+  if (parsedId < 1 || parsedId > 1010 ) {
     return 0
+  } else {
+    return 1
+    
   }
 }
 export function checkEvo(evo) {
-  if (evo > 530 || evo < 1) {
+  if (evo > 538 || evo < 1) {
     return 0
   } else {
     return 1
   }
 }
+export async function sleep (milliseconds) {
+  await new Promise(resolve => {
+      return setTimeout(resolve, milliseconds)
+  });
+};
 //Metódos para complexo da Pokedex//
 export async function evolutionChain(evolutionData) {
   const evoObj = await getObjEvolutionForNomepoke(evolutionData)

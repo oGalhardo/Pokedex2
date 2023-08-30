@@ -1,7 +1,8 @@
 <template>
   <div v-if="num === 1">
-    <button @click="attGeneration(idGen + 1)">Next Generation</button>
     <button @click="attGeneration(idGen - 1)">Back Generation</button>
+    <button @click="attGeneration(idGen + 1)">Next Generation</button>
+
     <div class="pokeGen">
       <div v-if="allGenPokemon != ''">
         <img
@@ -22,11 +23,11 @@ import { getPokemonsOfGeneration, checkGeneration } from '../api'
 
 export default {
   name: 'GenerationVue',
-  props:['num'],
+  props: ['num'],
   data() {
     return {
       allGenPokemon: [],
-      idGen: 1,
+      idGen: 1
     }
   },
   methods: {
@@ -46,16 +47,41 @@ export default {
 }
 </script>
 <style>
+button {
+  border: solid brown;
+  display: inline-block;
+  padding: 3px;
+  background: transparent;
+  font-size: 20px;
+  
+
+}
 .pokeInGen {
-  width: 120px;
-  height: 120px;
+  width: 115px;
+  height: 115px;
 }
 .pokeGen {
   overflow-y: scroll;
+  background-color: transparent;
   width: 750px;
   height: 500px;
   object-position: left top;
-  border: 2px solid black;
+}
+::-webkit-scrollbar-track {
+  display: none;
 }
 
+/* Estilos adicionais para a barra de rolagem */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
 </style>
