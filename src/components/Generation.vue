@@ -2,7 +2,6 @@
   <div v-if="num === 1">
     <button @click="attGeneration(idGen - 1)">Back Generation</button>
     <button @click="attGeneration(idGen + 1)">Next Generation</button>
-
     <div class="pokeGen">
       <div v-if="allGenPokemon != ''">
         <img
@@ -54,7 +53,6 @@ button {
   background: transparent;
   font-size: 20px;
   
-
 }
 .pokeInGen {
   width: 115px;

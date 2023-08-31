@@ -79,11 +79,8 @@ export function checkEvo(evo) {
     return 1
   }
 }
-export async function sleep (milliseconds) {
-  await new Promise(resolve => {
-      return setTimeout(resolve, milliseconds)
-  });
-};
+
+
 //Metódos para complexo da Pokedex//
 export async function evolutionChain(evolutionData) {
   const evoObj = await getObjEvolutionForNomepoke(evolutionData)

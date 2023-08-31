@@ -16,9 +16,10 @@
               :src="objPokemon.sprites.front_default"
               alt="Pokemon non existe"
               class="imgPokemon"
+              :style="{ display: imageDisplay }"
             />
+            <p class="error">{{ error }}</p>
           </div>
-          <p class="errorMsg" v-else></p>
         </div>
         <button @click="attPoke(objPokemon.id, parseInt(idEvo) - 1)" class="buttonBack"></button>
         <button @click="attPoke(objPokemon.id, parseInt(idEvo) + 1)" class="buttonNext"></button>
@@ -59,6 +60,8 @@ export default {
       idEvo: '',
       idPokeInEvoo: '',
       open: 0,
+      imageDisplay: 'block',
+      error: ''
     }
   },
   components: {
@@ -68,14 +71,22 @@ export default {
     pokedexOn(n) {
       this.open = n
     },
+    hideImageForSeconds(seconds, msg) {
+      this.imageDisplay = 'none' // Esconde a imagem
+      this.error = msg
+      setTimeout(() => {
+        this.imageDisplay = 'block' // Mostra a imagem novamente após o intervalo de tempo
+        this.error = ''
+      }, seconds * 1000) // Converte segundos para milissegundos
+    },
     async searchPokemon(nomePokemon) {
       this.nome = ''
       if (checkId(nomePokemon)) {
         this.objPokemon = await getPokemon(nomePokemon)
+        this.error = ''
         await this.infoPlus(this.objPokemon.id, this.objPokemon.name)
       } else {
-        const errorMsgElement = document.querySelector(".errorMsg");
-        errorMsgElement.textContent = "Não existe esse pokemon";
+        this.hideImageForSeconds(3, 'Pokemon not found')
       }
     },
     async infoPlus(id, name) {
@@ -90,13 +101,15 @@ export default {
         if (await getAttPokemon(poke, option)) {
           this.searchPokemon(await getAttPokemon(poke, option))
         } else {
-          const errorMsgElement = document.querySelector(".errorMsg");
-          errorMsgElement.textContent = "Não há mais evoluções";        }
+          this.hideImageForSeconds(3, 'No more Evo')
+        }
       } else {
-        const errorMsgElement = document.querySelector(".errorMsg");
-        errorMsgElement.textContent = "Não há pokemon pokemon";
+        this.hideImageForSeconds(3, 'Over Pokemons')
       }
     }
+  },
+  mounted() {
+    this.hideImageForSeconds(3) // Chama a função para esconder a imagem por 3 segundos
   }
 }
 </script>
@@ -110,16 +123,15 @@ export default {
   width: 100px;
   height: 100px;
 }
-.errorMsg {
-  color: rgb(12, 215, 12);
-  font-size: 15px;
-  font-weight: 700;
-  widows: 40px
-  ;
+.error {
+  position: relative;
+  background: transparent;
+  display: inline;
+  top: 30px;
+  right: 25px;
 }
 .dexGen {
   display: flex;
-  
 }
 
 .buttonBack {
@@ -164,8 +176,6 @@ p {
   font-weight: 700;
   color: rgb(12, 215, 12);
   transform: rotate(10deg);
-  
-
 }
 input {
   display: inline;
@@ -173,7 +183,6 @@ input {
   width: 100px;
   background: transparent;
   color: rgb(12, 215, 12);
-  
 }
 .searchPokeMenu {
   position: relative;
