@@ -1,12 +1,12 @@
 <template>
-  <div>
+  <div class="all">
     <button class="buttonOn" @click="pokedexOn(1)" v-if="open != 1"></button>
     <button class="buttonOff" @click="pokedexOn(0)" v-else></button>
     <div class="dexGen" v-if="open != 0">
       <div class="pokedex">
         <img src="../../public/img/Pok_dex_Kanto_1.png" />
         <div class="searchPokeMenu">
-          <p id="msg">Digite o Nome do Pokemon</p>
+          <p id="msg">Type the Pokemon</p>
           <br />
           <input type="text" v-model="nome" @keyup.enter="searchPokemon(nome)" />
         </div>
@@ -18,16 +18,21 @@
               class="imgPokemon"
               :style="{ display: imageDisplay }"
             />
-            <p class="error">{{ error }}</p>
           </div>
+          <p class="error">{{ error }}</p>
         </div>
-        <button @click="attPoke(objPokemon.id, parseInt(idEvo) - 1)" class="buttonBack"></button>
-        <button @click="attPoke(objPokemon.id, parseInt(idEvo) + 1)" class="buttonNext"></button>
-        <button
-          @click="attPoke(parseInt(idPokeInEvo) - 1, evoChain)"
-          class="buttonInvolue"
-        ></button>
-        <button @click="attPoke(parseInt(idPokeInEvo) + 1, evoChain)" class="buttonEvolue"></button>
+        <div class="dpad">
+          <button @click="attPoke(objPokemon.id, parseInt(idEvo) - 1)" class="buttonBack"></button>
+          <button @click="attPoke(objPokemon.id, parseInt(idEvo) + 1)" class="buttonNext"></button>
+          <button
+            @click="attPoke(parseInt(idPokeInEvo) - 1, evoChain)"
+            class="buttonInvolue"
+          ></button>
+          <button
+            @click="attPoke(parseInt(idPokeInEvo) + 1, evoChain)"
+            class="buttonEvolue"
+          ></button>
+        </div>
       </div>
       <GenerationVue class="clasGen" v-bind:num="open" />
     </div>
@@ -114,6 +119,12 @@ export default {
 }
 </script>
 <style>
+.all {
+  background: transparent;
+  position: absolute;
+  left: 250px;
+  bottom: -300px;
+}
 .pokemon {
   position: relative;
   top: -360px;
@@ -122,18 +133,22 @@ export default {
 .imgPokemon {
   width: 100px;
   height: 100px;
+  position: absolute;
 }
 .error {
-  position: relative;
+  position: absolute;
   background: transparent;
   display: inline;
-  top: 30px;
-  right: 25px;
+  top: 20x;
+  right: 620px;
 }
 .dexGen {
   display: flex;
 }
-
+.dpad {
+  position: relative;
+  top: 110px;
+}
 .buttonBack {
   background: transparent;
   position: relative;
@@ -141,7 +156,6 @@ export default {
   right: -225px;
   height: 25px;
   width: 25px;
-  border: none;
 }
 .buttonNext {
   background: transparent;
@@ -150,7 +164,6 @@ export default {
   right: -250px;
   height: 25px;
   width: 25px;
-  border: none;
 }
 .buttonEvolue {
   background: transparent;
@@ -159,7 +172,6 @@ export default {
   right: -175px;
   height: 25px;
   width: 25px;
-  border: none;
 }
 .buttonInvolue {
   background: transparent;
@@ -168,7 +180,6 @@ export default {
   right: -200px;
   height: 25px;
   width: 25px;
-  border: none;
 }
 p {
   display: inline;
@@ -195,23 +206,21 @@ input {
 }
 .buttonOff {
   position: relative;
-  background: black;
-  right: -50px;
-  top: 425px;
+  right: -60px;
+  top: 420px;
   border-radius: 25px;
-  height: 50px;
-  width: 50px;
+  height: 35px;
+  width: 35px;
   background: transparent;
-  border: none;
 }
 .buttonOn {
   position: relative;
   top: 340px;
-  right: -70px;
+  right: -95px;
   height: 50px;
-  width: 50px;
+  width: 20px;
   background: transparent;
-  border: none;
-  border-radius: 25px;
+  transform: rotate(-20deg);
+
 }
 </style>

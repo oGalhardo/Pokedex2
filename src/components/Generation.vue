@@ -1,7 +1,10 @@
 <template>
   <div v-if="num === 1">
-    <button @click="attGeneration(idGen - 1)">Back Generation</button>
-    <button @click="attGeneration(idGen + 1)">Next Generation</button>
+    <h2>Generation:{{ idGen }}</h2>
+    <div class="button-container">
+      <button @click="attGeneration(idGen - 1)">&#8592;</button>
+      <button @click="attGeneration(idGen + 1)">&#8594;</button>
+    </div>
     <div class="pokeGen">
       <div v-if="allGenPokemon != ''">
         <img
@@ -12,7 +15,7 @@
           class="pokeInGen"
         />
       </div>
-      <div v-else>Loading Generation...</div>
+      <div  v-else>Loading Generation...</div>
     </div>
   </div>
   <div v-else></div>
@@ -23,6 +26,7 @@ import { getPokemonsOfGeneration, checkGeneration } from '../api'
 export default {
   name: 'GenerationVue',
   props: ['num'],
+
   data() {
     return {
       allGenPokemon: [],
@@ -46,14 +50,14 @@ export default {
 }
 </script>
 <style>
-button {
-  border: solid brown;
-  display: inline-block;
-  padding: 3px;
-  background: transparent;
-  font-size: 20px;
-  
+h2{
+  flex-direction: column;
 }
+button{
+  background: transparent;
+  font-size: 20px
+}
+
 .pokeInGen {
   width: 115px;
   height: 115px;
@@ -64,6 +68,7 @@ button {
   width: 750px;
   height: 500px;
   object-position: left top;
+  position: absolute;
 }
 ::-webkit-scrollbar-track {
   display: none;
