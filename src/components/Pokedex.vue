@@ -18,6 +18,7 @@
               class="imgPokemon"
               :style="{ display: imageDisplay }"
             />
+            <div class="loader" :style="{display: load}"></div>
           </div>
           <p class="error">{{ error }}</p>
         </div>
@@ -49,7 +50,8 @@ import {
   getIdEvolutionChain,
   getAttPokemon,
   checkEvo,
-  checkId
+  checkId,
+  getImage
 } from '../api'
 import GenerationVue from './Generation.vue'
 export default {
@@ -59,13 +61,13 @@ export default {
     return {
       nome: '',
       objPokemon: '',
-      allGenPokemon: [],
       evoChain: [],
       urlEvo: '',
       idEvo: '',
       idPokeInEvoo: '',
       open: 0,
       imageDisplay: 'block',
+      load: 'none',
       error: ''
     }
   },
@@ -84,27 +86,38 @@ export default {
         this.error = ''
       }, seconds * 1000) // Converte segundos para milissegundos
     },
+    hideLoadforSeconds(seconds) {
+      this.imageDisplay = 'none' // Esconde a imagem
+      this.load = 'block'
+      setTimeout(() => {
+        this.imageDisplay = 'block' // Mostra a imagem novamente após o intervalo de tempo
+        this.load = 'none'
+      }, seconds * 1000) // Converte segundos para milissegundos
+    },
     async searchPokemon(nomePokemon) {
+      this.hideLoadforSeconds(2)
       this.nome = ''
       if (checkId(nomePokemon)) {
-        this.objPokemon = await getPokemon(nomePokemon)
+        this.objPokemon = await getImage(nomePokemon)
         this.error = ''
-        await this.infoPlus(this.objPokemon.id, this.objPokemon.name)
+        await this.infoPlus(nomePokemon)
       } else {
-        this.hideImageForSeconds(3, 'Pokemon not found')
+        this.hideImageForSeconds(2, 'Pokemon not found')
       }
     },
-    async infoPlus(id, name) {
-      this.evoChain = await evolutionChain(id)
-      this.idPokeInEvo = this.evoChain.indexOf(name)
-      this.urlEvo = await getUrlEvolution(id)
+    async infoPlus(poke) {
+      this.objPokemon = await getPokemon(poke)
+      this.evoChain = await evolutionChain(this.objPokemon.id)
+      this.idPokeInEvo = this.evoChain.indexOf(this.objPokemon.name)
+      this.urlEvo = await getUrlEvolution(this.objPokemon.id)
       this.idEvo = await getIdEvolutionChain(this.urlEvo)
     },
     async attPoke(poke, option) {
-      this.nome = ' '
-      if (checkEvo(option)) {
-        if (await getAttPokemon(poke, option)) {
-          this.searchPokemon(await getAttPokemon(poke, option))
+      this.hideLoadforSeconds(2)
+      if (checkEvo(option, poke)) {
+        const updatedPokemon = await getAttPokemon(poke, option)
+        if (updatedPokemon) {
+          this.searchPokemon(updatedPokemon)
         } else {
           this.hideImageForSeconds(3, 'No more Evo')
         }
@@ -114,11 +127,32 @@ export default {
     }
   },
   mounted() {
-    this.hideImageForSeconds(3) // Chama a função para esconder a imagem por 3 segundos
+    this.hideImageForSeconds(2) // Chama a função para esconder a imagem por 3 segundos
+    this.hideLoadforSeconds(2)
   }
 }
 </script>
 <style>
+.loader {
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid rgb(4, 209, 4); /* Blue */
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 2s linear infinite;
+  position: absolute;
+  top: 20px;
+  right: 615px
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
 .all {
   background: transparent;
   position: absolute;
@@ -221,6 +255,5 @@ input {
   width: 20px;
   background: transparent;
   transform: rotate(-20deg);
-
 }
 </style>

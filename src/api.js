@@ -72,8 +72,8 @@ export function checkId(id) {
     
   }
 }
-export function checkEvo(evo) {
-  if (evo > 538 || evo < 1) {
+export function checkEvo(evo,poke) {
+  if (evo > 538 || evo < 1 || poke == undefined) {
     return 0
   } else {
     return 1
@@ -82,6 +82,8 @@ export function checkEvo(evo) {
 
 
 //Metódos para complexo da Pokedex//
+
+
 export async function evolutionChain(evolutionData) {
   const evoObj = await getObjEvolutionForNomepoke(evolutionData)
   const evolutionNames = []
@@ -103,6 +105,7 @@ export async function getAttPokemon(poke, option) {
     }
   } else {
     const pokeAtt = await getNameEvolutionChain(option)
+    console.log(pokeAtt)
     return pokeAtt
   }
 }
