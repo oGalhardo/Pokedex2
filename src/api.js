@@ -79,8 +79,6 @@ export function checkEvo(evo,poke) {
     return 1
   }
 }
-
-
 //Metódos para complexo da Pokedex//
 
 
@@ -105,7 +103,6 @@ export async function getAttPokemon(poke, option) {
     }
   } else {
     const pokeAtt = await getNameEvolutionChain(option)
-    console.log(pokeAtt)
     return pokeAtt
   }
 }

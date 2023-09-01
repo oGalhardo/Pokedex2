@@ -10,6 +10,7 @@
           <br />
           <input type="text" v-model="nome" @keyup.enter="searchPokemon(nome)" />
         </div>
+        <button class="loadInfo">?</button>
         <div class="pokemon">
           <div v-if="objPokemon.id > 0">
             <img
@@ -18,9 +19,12 @@
               class="imgPokemon"
               :style="{ display: imageDisplay }"
             />
-            <div class="loader" :style="{display: load}"></div>
+            <div class="loader" :style="{ display: load }"></div>
           </div>
           <p class="error">{{ error }}</p>
+          <div class="infoPoke">
+            <div>Nome: {{ objPokemon.name }}</div>
+          </div>
         </div>
         <div class="dpad">
           <button @click="attPoke(objPokemon.id, parseInt(idEvo) - 1)" class="buttonBack"></button>
@@ -80,29 +84,29 @@ export default {
     },
     hideImageForSeconds(seconds, msg) {
       this.imageDisplay = 'none' // Esconde a imagem
-      this.error = msg
-      setTimeout(() => {
-        this.imageDisplay = 'block' // Mostra a imagem novamente após o intervalo de tempo
-        this.error = ''
-      }, seconds * 1000) // Converte segundos para milissegundos
-    },
-    hideLoadforSeconds(seconds) {
-      this.imageDisplay = 'none' // Esconde a imagem
-      this.load = 'block'
-      setTimeout(() => {
-        this.imageDisplay = 'block' // Mostra a imagem novamente após o intervalo de tempo
-        this.load = 'none'
-      }, seconds * 1000) // Converte segundos para milissegundos
+      if (msg != 'await') {
+        this.error = msg
+        setTimeout(() => {
+          this.imageDisplay = 'block' // Mostra a imagem novamente após o intervalo de tempo
+          this.error = ''
+        }, seconds * 1000) // Converte segundos para milissegundos
+      } else {
+        this.load = 'block'
+        setTimeout(() => {
+          this.imageDisplay = 'block' // Mostra a imagem novamente após o intervalo de tempo
+          this.load = 'none'
+        }, seconds * 1000) // Converte segundos para milissegundos
+      }
     },
     async searchPokemon(nomePokemon) {
-      this.hideLoadforSeconds(2)
       this.nome = ''
       if (checkId(nomePokemon)) {
+        this.hideImageForSeconds(1.2, 'await')
         this.objPokemon = await getImage(nomePokemon)
         this.error = ''
         await this.infoPlus(nomePokemon)
       } else {
-        this.hideImageForSeconds(2, 'Pokemon not found')
+        this.hideImageForSeconds(1.2, 'Pokemon not found')
       }
     },
     async infoPlus(poke) {
@@ -113,9 +117,9 @@ export default {
       this.idEvo = await getIdEvolutionChain(this.urlEvo)
     },
     async attPoke(poke, option) {
-      this.hideLoadforSeconds(2)
       if (checkEvo(option, poke)) {
         const updatedPokemon = await getAttPokemon(poke, option)
+        this.hideImageForSeconds(1.2, 'await')
         if (updatedPokemon) {
           this.searchPokemon(updatedPokemon)
         } else {
@@ -128,11 +132,22 @@ export default {
   },
   mounted() {
     this.hideImageForSeconds(2) // Chama a função para esconder a imagem por 3 segundos
-    this.hideLoadforSeconds(2)
   }
 }
 </script>
 <style>
+.infoPoke {
+  border-width: 2px;
+  position: absolute;
+  transform: rotate(-2deg);
+  overflow-x: scroll;
+  height: 110px;
+  left: -30px;
+  top: -15px;
+  width: 160px;
+  color: rgb(4, 209, 4);
+}
+
 .loader {
   border: 16px solid #f3f3f3; /* Light grey */
   border-top: 16px solid rgb(4, 209, 4); /* Blue */
@@ -142,9 +157,8 @@ export default {
   animation: spin 2s linear infinite;
   position: absolute;
   top: 20px;
-  right: 615px
+  right: 615px;
 }
-
 @keyframes spin {
   0% {
     transform: rotate(0deg);
@@ -152,6 +166,14 @@ export default {
   100% {
     transform: rotate(360deg);
   }
+}
+.loadInfo {
+  position: absolute;
+  left: 405px;
+  bottom: 325px;
+  width: 40px;
+  height: 32px;
+  transform: rotate(-1deg);
 }
 .all {
   background: transparent;
