@@ -1,5 +1,6 @@
 <template>
   <div class="all">
+    <img src="imgs" alt="" />
     <button class="buttonOn" @click="pokedexOn(1)" v-if="open != 1"></button>
     <button class="buttonOff" @click="pokedexOn(0)" v-else></button>
     <div class="dexGen" v-if="open != 0">
@@ -11,19 +12,27 @@
           <input type="text" v-model="nome" @keyup.enter="searchPokemon(nome)" />
         </div>
         <div class="pokemon">
-          <div class="loadInfo" v-if="error==''">
-          <div v-if="objPokemon">
-            <div class="nomePoke" v-if="error==''">Nome: {{ objPokemon.name }}</div>
-            <img
-              :src="objPokemon.sprites.front_default"
-              alt="Pokemon non existe"
-              class="imgPokemon"
-              :style="{ display: imageDisplay }"
-            />
-            <div class="loader" :style="{ display: load }"></div>
+          <button class="butMoreInfoPoke" @click="mostInfoPoke">{{ icon }}</button>
+          <div class="loadInfo" v-if="error == ''">
+            <div v-if="objPokemon">
+              <div class="nomePoke"  :style="{ display: imageDisplay }" >Name: {{ objPokemon.name }}</div>
+              <img
+                :src="objPokemon.sprites.front_default"
+                alt="Pokemon non existe"
+                class="imgPokemon"
+                :style="{ display: imageDisplay }"
+              />
+              <div class="loader" :style="{ display: load }"></div>
+              <div class="infoPoke" :style="{ display: menuInfo }">
+                <p>Type:{{ objInfoPoke[0] }}</p>
+                <br />-------<br />
+                <p>Gen:{{ objInfoPoke[1] }}</p>
+                <br />-------<br />
+                <p>Descri:{{ objInfoPoke[2] }}</p>
+              </div>
+            </div>
           </div>
-          </div>
-          <p class="error">{{ error }}</p>          
+          <p class="error">{{ error }}</p>
         </div>
         <div class="dpad">
           <button @click="attPoke(objPokemon.id, parseInt(idEvo) - 1)" class="buttonBack"></button>
@@ -53,6 +62,7 @@ import {
   getIdEvolutionChain,
   getAttPokemon,
   checkEvo,
+  getInfoPlusPoke
 } from '../api'
 import GenerationVue from './Generation.vue'
 export default {
@@ -69,7 +79,10 @@ export default {
       open: 0,
       imageDisplay: 'block',
       load: 'none',
-      error: ''
+      error: '',
+      objInfoPoke: '',
+      menuInfo: 'none',
+      icon:'+'
     }
   },
   components: {
@@ -80,19 +93,19 @@ export default {
       this.open = n
     },
     hideImageForSeconds(seconds, msg) {
-      this.imageDisplay = 'none' 
+      this.imageDisplay = 'none'
       if (msg != 'await') {
         this.error = msg
         setTimeout(() => {
-          this.imageDisplay = 'block' 
+          this.imageDisplay = 'block'
           this.error = ''
-        }, seconds * 1000) 
+        }, seconds * 1000)
       } else {
         this.load = 'block'
         setTimeout(() => {
-          this.imageDisplay = 'block' 
+          this.imageDisplay = 'block'
           this.load = 'none'
-        }, seconds * 1000) 
+        }, seconds * 1000)
       }
     },
     async searchPokemon(nomePokemon) {
@@ -101,15 +114,16 @@ export default {
       if (this.objPokemon != undefined) {
         this.hideImageForSeconds(1.5, 'await')
         this.error = ''
-        await this.infoPlus(this.objPokemon.id,this.objPokemon.name)
+        await this.infoPlus(this.objPokemon)
       } else {
-        this.hideImageForSeconds(2, 'Pokemon not found')
+        this.hideImageForSeconds(1.5, 'Pokemon not found')
       }
     },
-    async infoPlus(id,name) {
-      this.evoChain = await evolutionChain(name)
-      this.idPokeInEvo = this.evoChain.indexOf(name)
-      this.urlEvo = await getUrlEvolution(id)
+    async infoPlus(poke) {
+      this.objInfoPoke = await getInfoPlusPoke(poke)
+      this.evoChain = await evolutionChain(poke.name)
+      this.idPokeInEvo = this.evoChain.indexOf(poke.name)
+      this.urlEvo = await getUrlEvolution(poke.id)
       this.idEvo = await getIdEvolutionChain(this.urlEvo)
     },
     async attPoke(poke, option) {
@@ -124,40 +138,93 @@ export default {
       } else {
         this.hideImageForSeconds(1.5, 'Over Pokemons')
       }
+    },
+    async mostInfoPoke() {
+      if(this.imageDisplay == 'block'){
+        this.icon = 'x'
+        this.imageDisplay = 'none'
+        this.menuInfo = 'block'
+      }else{
+        this.imageDisplay = 'block'
+        this.menuInfo = 'none'
+        this.icon = '+'
+      }
     }
-  },
+  }
 }
 </script>
 <style>
-.nomePoke {
-  border-width: 2px;
+.infoPoke {
+  width: 150px;
+  height: 100px;
+  top: -20px;
+  transform: rotate(-0.5deg);
+  left: -35px;
   position: absolute;
-  overflow-x: scroll;
+  overflow-y: scroll;
+  background: transparent;
+}
+.butMoreInfoPoke {
+  position: absolute;
+  left: 95px;
+  top: 87px;
+  width: 50px;
+  height: 33px;
+  transform: rotate(-1deg);
+  background: black;
+  border-radius: 20px;
+  color: white;
+}
+.nomePoke {
+  position: absolute;
   height: 110px;
   left: -35px;
   top: -20px;
   width: 160px;
-  font-weight: bold ;
-  color:  rgb(4, 209, 4);
+  font-weight: bold;
 }
 
 .loader {
-  border: 16px solid #f3f3f3; /* Light grey */
-  border-top: 16px solid rgb(4, 209, 4); /* Blue */
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  animation: spin 2s linear infinite;
+  height: 60px;
+  aspect-ratio: 1;
   position: absolute;
-  top: 20px;
-  right: -30px;
+  left: 20px;
+  top: 10px;
 }
-@keyframes spin {
-  0% {
+.loader::before,
+.loader::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  transform-origin: bottom;
+}
+.loader::after {
+  background:
+    radial-gradient(at 75% 15%, #fffb, #0000 35%),
+    radial-gradient(at 80% 40%, #0000, #0008),
+    radial-gradient(circle 5px, #fff 94%, #0000),
+    radial-gradient(circle 10px, #000 94%, #0000),
+    linear-gradient(#f93318 0 0) top / 100% calc(50% - 5px),
+    linear-gradient(#fff 0 0) bottom/100% calc(50% - 5px) #000;
+  background-repeat: no-repeat;
+  animation: l20 1s infinite cubic-bezier(0.5, 120, 0.5, -120);
+}
+.loader::before {
+  background: #ddd;
+  filter: blur(8px);
+  transform: scaleY(0.4) translate(-13px, 0px);
+}
+@keyframes l20 {
+  30%,
+  70% {
     transform: rotate(0deg);
   }
-  100% {
-    transform: rotate(360deg);
+  49.99% {
+    transform: rotate(0.2deg);
+  }
+  50% {
+    transform: rotate(-0.2deg);
   }
 }
 .loadInfo {
@@ -166,7 +233,8 @@ export default {
   bottom: -30px;
   width: 40px;
   height: 32px;
-  transform: rotate(-1deg);
+  transform: rotate(-2deg);
+  color: rgb(4, 209, 4);
 }
 .all {
   background: transparent;

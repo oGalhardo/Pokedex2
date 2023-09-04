@@ -7,6 +7,7 @@ export async function getImage(identifier) {
   const poke = await getPokemon(identifier)
   return poke.sprites.front_default
 }
+
 export async function getNamePokemon(identifier) {
   const poke = await getPokemon(identifier)
   return poke.name
@@ -15,9 +16,17 @@ export async function getNamePokemon(identifier) {
 export async function getSpecies(identifier) {
   return await getFromAPI('pokemon-species', identifier)
 }
+export async function getSpeciesEvo(identifier){
+  const poke = await getSpecies(identifier)
+  return poke.generation.name
+}
 export async function getUrlEvolution(identifier) {
   const poke = await getSpecies(identifier)
   return poke.evolution_chain.url
+}
+export async function getFormDescription(id){
+  const poke = await getSpecies(id)
+  return poke.flavor_text_entries[0].flavor_text
 }
 //Metodos Generation
 export async function getGeneration(identifier) {
@@ -79,7 +88,14 @@ export function checkEvo(evo, poke) {
   }
 }
 //Metódos para complexo da Pokedex//
-
+export async function getInfoPlusPoke(identifier){
+  const informations = []
+  informations.push(identifier.types[0].type.name)
+  informations.push(await getSpeciesEvo(identifier.id))
+  const textPoke = (await getFormDescription(identifier.id))
+  informations.push(textPoke)
+  return Promise.all(informations)
+}
 export async function evolutionChain(evolutionData) {
   const evoObj = await getObjEvolutionForNomepoke(evolutionData)
   const evolutionNames = []
