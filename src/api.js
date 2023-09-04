@@ -64,15 +64,14 @@ export function checkGeneration(id) {
   }
 }
 export function checkId(id) {
-  const parsedId = +id 
-  if (parsedId < 1 || parsedId > 1010 ) {
+  const parsedId = +id
+  if (parsedId < 1 || parsedId > 1010) {
     return 0
   } else {
     return 1
-    
   }
 }
-export function checkEvo(evo,poke) {
+export function checkEvo(evo, poke) {
   if (evo > 538 || evo < 1 || poke == undefined) {
     return 0
   } else {
@@ -80,7 +79,6 @@ export function checkEvo(evo,poke) {
   }
 }
 //Metódos para complexo da Pokedex//
-
 
 export async function evolutionChain(evolutionData) {
   const evoObj = await getObjEvolutionForNomepoke(evolutionData)

@@ -10,21 +10,20 @@
           <br />
           <input type="text" v-model="nome" @keyup.enter="searchPokemon(nome)" />
         </div>
-        <button class="loadInfo">?</button>
         <div class="pokemon">
-          <div v-if="objPokemon.id > 0">
+          <div class="loadInfo" v-if="error==''">
+          <div v-if="objPokemon">
+            <div class="nomePoke" v-if="error==''">Nome: {{ objPokemon.name }}</div>
             <img
               :src="objPokemon.sprites.front_default"
               alt="Pokemon non existe"
               class="imgPokemon"
               :style="{ display: imageDisplay }"
             />
-            <div class="loader" :style="{ display: load }" v-if="error==''"></div>
+            <div class="loader" :style="{ display: load }"></div>
           </div>
-          <p class="error">{{ error }}</p>
-          <div class="infoPoke">
-            <div>Nome: {{ objPokemon.name }}</div>
           </div>
+          <p class="error">{{ error }}</p>          
         </div>
         <div class="dpad">
           <button @click="attPoke(objPokemon.id, parseInt(idEvo) - 1)" class="buttonBack"></button>
@@ -54,8 +53,6 @@ import {
   getIdEvolutionChain,
   getAttPokemon,
   checkEvo,
-  checkId,
-  getImage
 } from '../api'
 import GenerationVue from './Generation.vue'
 export default {
@@ -91,7 +88,6 @@ export default {
           this.error = ''
         }, seconds * 1000) 
       } else {
-        console.log(this.error)
         this.load = 'block'
         setTimeout(() => {
           this.imageDisplay = 'block' 
@@ -101,20 +97,19 @@ export default {
     },
     async searchPokemon(nomePokemon) {
       this.nome = ''
-      if (checkId(nomePokemon)) {
+      this.objPokemon = await getPokemon(nomePokemon)
+      if (this.objPokemon != undefined) {
         this.hideImageForSeconds(1.5, 'await')
-        this.objPokemon = await getImage(nomePokemon)
         this.error = ''
-        await this.infoPlus(nomePokemon)
+        await this.infoPlus(this.objPokemon.id,this.objPokemon.name)
       } else {
-        this.hideImageForSeconds(1.5, 'Pokemon not found')
+        this.hideImageForSeconds(2, 'Pokemon not found')
       }
     },
-    async infoPlus(poke) {
-      this.objPokemon = await getPokemon(poke)
-      this.evoChain = await evolutionChain(this.objPokemon.id)
-      this.idPokeInEvo = this.evoChain.indexOf(this.objPokemon.name)
-      this.urlEvo = await getUrlEvolution(this.objPokemon.id)
+    async infoPlus(id,name) {
+      this.evoChain = await evolutionChain(name)
+      this.idPokeInEvo = this.evoChain.indexOf(name)
+      this.urlEvo = await getUrlEvolution(id)
       this.idEvo = await getIdEvolutionChain(this.urlEvo)
     },
     async attPoke(poke, option) {
@@ -134,16 +129,16 @@ export default {
 }
 </script>
 <style>
-.infoPoke {
+.nomePoke {
   border-width: 2px;
   position: absolute;
-  transform: rotate(-2deg);
   overflow-x: scroll;
   height: 110px;
-  left: -30px;
-  top: -15px;
+  left: -35px;
+  top: -20px;
   width: 160px;
-  color: rgb(4, 209, 4);
+  font-weight: bold ;
+  color:  rgb(4, 209, 4);
 }
 
 .loader {
@@ -155,7 +150,7 @@ export default {
   animation: spin 2s linear infinite;
   position: absolute;
   top: 20px;
-  right: 615px;
+  right: -30px;
 }
 @keyframes spin {
   0% {
@@ -167,8 +162,8 @@ export default {
 }
 .loadInfo {
   position: absolute;
-  left: 405px;
-  bottom: 325px;
+  left: 5px;
+  bottom: -30px;
   width: 40px;
   height: 32px;
   transform: rotate(-1deg);
@@ -181,7 +176,7 @@ export default {
 }
 .pokemon {
   position: relative;
-  top: -360px;
+  top: -350px;
   right: -140px;
 }
 .imgPokemon {
@@ -194,7 +189,8 @@ export default {
   background: transparent;
   display: inline;
   top: 20x;
-  right: 620px;
+  right: 600px;
+  transform: rotate(-1deg);
 }
 .dexGen {
   display: flex;
