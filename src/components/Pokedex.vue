@@ -19,7 +19,7 @@
               class="imgPokemon"
               :style="{ display: imageDisplay }"
             />
-            <div class="loader" :style="{ display: load }"></div>
+            <div class="loader" :style="{ display: load }" v-if="error==''"></div>
           </div>
           <p class="error">{{ error }}</p>
           <div class="infoPoke">
@@ -83,30 +83,31 @@ export default {
       this.open = n
     },
     hideImageForSeconds(seconds, msg) {
-      this.imageDisplay = 'none' // Esconde a imagem
+      this.imageDisplay = 'none' 
       if (msg != 'await') {
         this.error = msg
         setTimeout(() => {
-          this.imageDisplay = 'block' // Mostra a imagem novamente após o intervalo de tempo
+          this.imageDisplay = 'block' 
           this.error = ''
-        }, seconds * 1000) // Converte segundos para milissegundos
+        }, seconds * 1000) 
       } else {
+        console.log(this.error)
         this.load = 'block'
         setTimeout(() => {
-          this.imageDisplay = 'block' // Mostra a imagem novamente após o intervalo de tempo
+          this.imageDisplay = 'block' 
           this.load = 'none'
-        }, seconds * 1000) // Converte segundos para milissegundos
+        }, seconds * 1000) 
       }
     },
     async searchPokemon(nomePokemon) {
       this.nome = ''
       if (checkId(nomePokemon)) {
-        this.hideImageForSeconds(1.2, 'await')
+        this.hideImageForSeconds(1.5, 'await')
         this.objPokemon = await getImage(nomePokemon)
         this.error = ''
         await this.infoPlus(nomePokemon)
       } else {
-        this.hideImageForSeconds(1.2, 'Pokemon not found')
+        this.hideImageForSeconds(1.5, 'Pokemon not found')
       }
     },
     async infoPlus(poke) {
@@ -119,20 +120,17 @@ export default {
     async attPoke(poke, option) {
       if (checkEvo(option, poke)) {
         const updatedPokemon = await getAttPokemon(poke, option)
-        this.hideImageForSeconds(1.2, 'await')
+        this.hideImageForSeconds(1.5, 'await')
         if (updatedPokemon) {
           this.searchPokemon(updatedPokemon)
         } else {
-          this.hideImageForSeconds(3, 'No more Evo')
+          this.hideImageForSeconds(1.5, 'No more Evo')
         }
       } else {
-        this.hideImageForSeconds(3, 'Over Pokemons')
+        this.hideImageForSeconds(1.5, 'Over Pokemons')
       }
     }
   },
-  mounted() {
-    this.hideImageForSeconds(2) // Chama a função para esconder a imagem por 3 segundos
-  }
 }
 </script>
 <style>
