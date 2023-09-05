@@ -9,28 +9,29 @@
       <div v-if="allGenPokemon != ''">
         <img
           v-for="poke in allGenPokemon"
+          @click="setPokeInPokedex(poke)"
           :key="poke"
           :src="poke"
           alt="Pokemon Sprite"
           class="pokeInGen"
         />
       </div>
-      <div  v-else>Loading Generation...</div>
+      <div v-else>Loading Generation...</div>
     </div>
   </div>
   <div v-else></div>
 </template>
 <script>
-import { getPokemonsOfGeneration, checkGeneration } from '../api'
-
+import { getPokemonsOfGeneration, checkGeneration, getIdForImgPokemon } from '../api'
+import { usePokemonStore} from '../store/pokemonStore'
 export default {
   name: 'GenerationVue',
   props: ['num'],
-
   data() {
     return {
       allGenPokemon: [],
-      idGen: 1
+      idGen: 1,
+      pokeForPokedex: ''
     }
   },
   methods: {
@@ -42,6 +43,10 @@ export default {
       } else {
         alert('Não existe mais gerações')
       }
+    },
+    setPokeInPokedex(pokemoImg) {
+      this.pokeForPokedex = getIdForImgPokemon(pokemoImg)
+      usePokemonStore().setPokemonGen(this.pokeForPokedex)
     }
   },
   async beforeMount() {
@@ -50,17 +55,25 @@ export default {
 }
 </script>
 <style>
-h2{
+h2 {
   flex-direction: column;
 }
-button{
+button {
   background: transparent;
-  font-size: 20px
+  font-size: 20px;
 }
 
 .pokeInGen {
   width: 115px;
   height: 115px;
+  top: 86px;
+  right: 92px;
+  transform: scale(1);
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+.pokeInGen:hover {
+  transform: scale(1.5);
 }
 .pokeGen {
   overflow-y: scroll;

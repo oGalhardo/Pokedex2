@@ -7,10 +7,15 @@ export async function getImage(identifier) {
   const poke = await getPokemon(identifier)
   return poke.sprites.front_default
 }
-
 export async function getNamePokemon(identifier) {
   const poke = await getPokemon(identifier)
   return poke.name
+}
+export  function getIdForImgPokemon(img){
+  const part = img.split('/')
+  const idForPart = part[part.length - 1]
+  const id = idForPart.split(".")
+  return id[0]
 }
 //Metódos Species
 export async function getSpecies(identifier) {
@@ -63,6 +68,13 @@ export async function getObjEvolutionForNomepoke(nomePoke) {
   const pokeIdEvo = await getIdEvolutionChain(pokeUrlEvo)
   const pokeObjEvo = await getObjEvolution(pokeIdEvo)
   return pokeObjEvo
+}
+export async function getSpritesOfEvo(evos){
+  var spritesEvo = []
+  evos.forEach(e => {
+    spritesEvo.push(getImage(e))
+  });
+  return Promise.all(spritesEvo)
 }
 //Metódos de verificação
 export function checkGeneration(id) {

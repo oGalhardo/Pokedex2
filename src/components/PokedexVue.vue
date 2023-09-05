@@ -15,12 +15,14 @@
           <button class="butMoreInfoPoke" @click="mostInfoPoke">{{ icon }}</button>
           <div class="loadInfo" v-if="error == ''">
             <div v-if="objPokemon">
-              <div class="nomePoke"  :style="{ display: imageDisplay }" >Name: {{ objPokemon.name }}</div>
+              <div class="nomePoke" :style="{ display: imageDisplay }">
+                Name: {{ objPokemon.name }}
+              </div>
               <img
                 :src="objPokemon.sprites.front_default"
                 alt="Pokemon non existe"
                 class="imgPokemon"
-                :style="{ display: imageDisplay }"
+                :style="{ display: imageDisplay, filter: imageFilter }"
               />
               <div class="loader" :style="{ display: load }"></div>
               <div class="infoPoke" :style="{ display: menuInfo }">
@@ -29,6 +31,11 @@
                 <p>Gen:{{ objInfoPoke[1] }}</p>
                 <br />-------<br />
                 <p>Descri:{{ objInfoPoke[2] }}</p>
+                <br />-------<br />
+                Evo Chain:
+                <div class="evoInPokedex" v-for="sprite in spritesEvo" :key="sprite">
+                  <img :src="sprite" />
+                </div>
               </div>
             </div>
           </div>
@@ -62,11 +69,13 @@ import {
   getIdEvolutionChain,
   getAttPokemon,
   checkEvo,
-  getInfoPlusPoke
+  getInfoPlusPoke,
+  getSpritesOfEvo
 } from '../api'
-import GenerationVue from './Generation.vue'
+import GenerationVue from './GenerationVue.vue'
+import { usePokemonStore } from '../store/pokemonStore'
 export default {
-  name: 'App',
+  name: 'PokedexVue',
   props: ['num'],
   data() {
     return {
@@ -82,15 +91,38 @@ export default {
       error: '',
       objInfoPoke: '',
       menuInfo: 'none',
-      icon:'+'
+      icon: '+',
+      spritesEvo: ''
     }
   },
   components: {
     GenerationVue
   },
+  computed: {
+    idValue() {
+      return usePokemonStore().pokeGen
+    }
+  },
+  watch: {
+    idValue(newValue) {
+      this.searchPokemon(newValue)
+    },
+    objPokemon(newPoke, oldPoke) {
+      this.toggleImages(newPoke, oldPoke), setInterval(this.toggleImages, 2000)
+    }
+  },
+
   methods: {
     pokedexOn(n) {
       this.open = n
+    },
+    toggleImages(np, op) {
+      if (typeof np === 'object' && np !== null) {
+        np.imageFilter = 'brightness(0) invert(1)'
+      }
+      if (typeof op === 'object' && op !== null) {
+        op.imageFilter = 'brightness(0) invert(1)'
+      }
     },
     hideImageForSeconds(seconds, msg) {
       this.imageDisplay = 'none'
@@ -119,12 +151,16 @@ export default {
         this.hideImageForSeconds(1.5, 'Pokemon not found')
       }
     },
+    applyFilter() {
+      this.imageFilter = 'brightness(0.5) invert(0)'
+    },
     async infoPlus(poke) {
       this.objInfoPoke = await getInfoPlusPoke(poke)
       this.evoChain = await evolutionChain(poke.name)
       this.idPokeInEvo = this.evoChain.indexOf(poke.name)
       this.urlEvo = await getUrlEvolution(poke.id)
       this.idEvo = await getIdEvolutionChain(this.urlEvo)
+      this.spritesEvo = await getSpritesOfEvo(this.evoChain)
     },
     async attPoke(poke, option) {
       if (checkEvo(option, poke)) {
@@ -140,11 +176,11 @@ export default {
       }
     },
     async mostInfoPoke() {
-      if(this.imageDisplay == 'block'){
+      if (this.imageDisplay == 'block') {
         this.icon = 'x'
         this.imageDisplay = 'none'
         this.menuInfo = 'block'
-      }else{
+      } else {
         this.imageDisplay = 'block'
         this.menuInfo = 'none'
         this.icon = '+'
@@ -163,6 +199,7 @@ export default {
   position: absolute;
   overflow-y: scroll;
   background: transparent;
+  font-weight: bold;
 }
 .butMoreInfoPoke {
   position: absolute;
@@ -247,10 +284,17 @@ export default {
   top: -350px;
   right: -140px;
 }
+
 .imgPokemon {
   width: 100px;
   height: 100px;
   position: absolute;
+  transform: scale(1);
+  transition: transform 0.3s;
+  filter: brightness(1);
+}
+.imgPokemon:hover {
+  transform: scale(1.5);
 }
 .error {
   position: absolute;
