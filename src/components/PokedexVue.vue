@@ -15,7 +15,7 @@
           <button class="butMoreInfoPoke" @click="mostInfoPoke">{{ icon }}</button>
           <div class="loadInfo" v-if="error == ''">
             <div v-if="objPokemon">
-              <div class="nomePoke" :style="{ display: imageDisplay }">
+              <div class="nomePoke" :style="{ display: imageDisplay, filter: imageFilter }">
                 Name: {{ objPokemon.name }}
               </div>
               <img
@@ -87,6 +87,7 @@ export default {
       idPokeInEvoo: '',
       open: 0,
       imageDisplay: 'block',
+      imageFilter: 'brightness(1) invert(0)',
       load: 'none',
       error: '',
       objInfoPoke: '',
@@ -107,22 +108,10 @@ export default {
     idValue(newValue) {
       this.searchPokemon(newValue)
     },
-    objPokemon(newPoke, oldPoke) {
-      this.toggleImages(newPoke, oldPoke), setInterval(this.toggleImages, 2000)
-    }
   },
-
   methods: {
     pokedexOn(n) {
       this.open = n
-    },
-    toggleImages(np, op) {
-      if (typeof np === 'object' && np !== null) {
-        np.imageFilter = 'brightness(0) invert(1)'
-      }
-      if (typeof op === 'object' && op !== null) {
-        op.imageFilter = 'brightness(0) invert(1)'
-      }
     },
     hideImageForSeconds(seconds, msg) {
       this.imageDisplay = 'none'
@@ -150,9 +139,6 @@ export default {
       } else {
         this.hideImageForSeconds(1.5, 'Pokemon not found')
       }
-    },
-    applyFilter() {
-      this.imageFilter = 'brightness(0.5) invert(0)'
     },
     async infoPlus(poke) {
       this.objInfoPoke = await getInfoPlusPoke(poke)
