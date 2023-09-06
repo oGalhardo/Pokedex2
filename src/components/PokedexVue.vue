@@ -12,44 +12,50 @@
           <input type="text" v-model="nome" @keyup.enter="searchPokemon(nome)" />
         </div>
         <div class="pokemon">
-          <button class="butMoreInfoPoke" @click="mostInfoPoke">{{ icon }}</button>
+          <button class="butMoreInfoPoke" :disabled="isLoading" @click="mostInfoPoke">
+            {{ icon }}
+          </button>
           <div class="loadInfo" v-if="error == ''">
             <div v-if="objPokemon">
-              <div class="nomePoke" :style="{ display: imageDisplay, filter: imageFilter }">
+              <div class="nomePoke" :style="{ display: imageDisplay }">
                 Name: {{ objPokemon.name }}
               </div>
               <img
                 :src="objPokemon.sprites.front_default"
                 alt="Pokemon non existe"
                 class="imgPokemon"
-                :style="{ display: imageDisplay, filter: imageFilter }"
+                :style="{ display: imageDisplay }"
               />
               <div class="loader" :style="{ display: load }"></div>
               <div class="infoPoke" :style="{ display: menuInfo }">
-                <p>Type:{{ objInfoPoke[0] }}</p>
+                <p>Type:{{ objInfoPoke[1] }}</p>
                 <br />-------<br />
-                <p>Gen:{{ objInfoPoke[1] }}</p>
+                <p>Gen:{{ objInfoPoke[4] }}</p>
                 <br />-------<br />
-                <p>Descri:{{ objInfoPoke[2] }}</p>
+                <p>Descri:{{ objInfoPoke[5] }}</p>
                 <br />-------<br />
-                Evo Chain:
-                <div class="evoInPokedex" v-for="sprite in spritesEvo" :key="sprite">
-                  <img :src="sprite" />
-                </div>
+                <p>EvoChain:</p>
+                <p v-for="sprite in objInfoPoke[6]" :key="sprite"><img :src="sprite" /></p>
               </div>
             </div>
           </div>
           <p class="error">{{ error }}</p>
         </div>
         <div class="dpad">
-          <button @click="attPoke(objPokemon.id, parseInt(idEvo) - 1)" class="buttonBack"></button>
-          <button @click="attPoke(objPokemon.id, parseInt(idEvo) + 1)" class="buttonNext"></button>
           <button
-            @click="attPoke(parseInt(idPokeInEvo) - 1, evoChain)"
+            @click="attPoke(objPokemon.id, parseInt(objInfoPoke[3]) - 1)"
+            class="buttonBack"
+          ></button>
+          <button
+            @click="attPoke(objPokemon.id, parseInt(objInfoPoke[3]) + 1)"
+            class="buttonNext"
+          ></button>
+          <button
+            @click="attPoke(parseInt(idPokeInEvo) - 1, objInfoPoke[0])"
             class="buttonInvolue"
           ></button>
           <button
-            @click="attPoke(parseInt(idPokeInEvo) + 1, evoChain)"
+            @click="attPoke(parseInt(idPokeInEvo) + 1, objInfoPoke[0])"
             class="buttonEvolue"
           ></button>
         </div>
@@ -62,16 +68,7 @@
   </div>
 </template>
 <script>
-import {
-  getPokemon,
-  evolutionChain,
-  getUrlEvolution,
-  getIdEvolutionChain,
-  getAttPokemon,
-  checkEvo,
-  getInfoPlusPoke,
-  getSpritesOfEvo
-} from '../api'
+import { getPokemon, getAttPokemon, checkEvo, getInfoPlusPoke } from '../api'
 import GenerationVue from './GenerationVue.vue'
 import { usePokemonStore } from '../store/pokemonStore'
 export default {
@@ -81,37 +78,37 @@ export default {
     return {
       nome: '',
       objPokemon: '',
-      evoChain: [],
-      urlEvo: '',
-      idEvo: '',
-      idPokeInEvoo: '',
+      idPokeInEvo: '',
       open: 0,
       imageDisplay: 'block',
-      imageFilter: 'brightness(1) invert(0)',
       load: 'none',
       error: '',
       objInfoPoke: '',
       menuInfo: 'none',
       icon: '+',
-      spritesEvo: ''
+      isLoading: true
     }
   },
   components: {
     GenerationVue
   },
   computed: {
-    idValue() {
+    pokeForGen() {
       return usePokemonStore().pokeGen
     }
   },
   watch: {
-    idValue(newValue) {
-      this.searchPokemon(newValue)
-    },
+    pokeForGen(novoValor) {
+      this.searchPokemon(novoValor)
+    }
   },
   methods: {
     pokedexOn(n) {
       this.open = n
+      if (n == 0) {
+        this.objPokemon = ''
+        this.isLoading = true
+      }
     },
     hideImageForSeconds(seconds, msg) {
       this.imageDisplay = 'none'
@@ -122,15 +119,19 @@ export default {
           this.error = ''
         }, seconds * 1000)
       } else {
+        this.isLoading = true
         this.load = 'block'
         setTimeout(() => {
           this.imageDisplay = 'block'
+          this.isLoading = false
           this.load = 'none'
         }, seconds * 1000)
       }
     },
     async searchPokemon(nomePokemon) {
       this.nome = ''
+      this.menuInfo = 'none'
+      this.icon = '+'
       this.objPokemon = await getPokemon(nomePokemon)
       if (this.objPokemon != undefined) {
         this.hideImageForSeconds(1.5, 'await')
@@ -141,12 +142,8 @@ export default {
       }
     },
     async infoPlus(poke) {
-      this.objInfoPoke = await getInfoPlusPoke(poke)
-      this.evoChain = await evolutionChain(poke.name)
-      this.idPokeInEvo = this.evoChain.indexOf(poke.name)
-      this.urlEvo = await getUrlEvolution(poke.id)
-      this.idEvo = await getIdEvolutionChain(this.urlEvo)
-      this.spritesEvo = await getSpritesOfEvo(this.evoChain)
+      this.objInfoPoke = await getInfoPlusPoke(poke, this.evoChain)
+      this.idPokeInEvo = await this.objInfoPoke[0].indexOf(poke.name)
     },
     async attPoke(poke, option) {
       if (checkEvo(option, poke)) {
@@ -161,7 +158,7 @@ export default {
         this.hideImageForSeconds(1.5, 'Over Pokemons')
       }
     },
-    async mostInfoPoke() {
+    mostInfoPoke() {
       if (this.imageDisplay == 'block') {
         this.icon = 'x'
         this.imageDisplay = 'none'
@@ -185,7 +182,6 @@ export default {
   position: absolute;
   overflow-y: scroll;
   background: transparent;
-  font-weight: bold;
 }
 .butMoreInfoPoke {
   position: absolute;
@@ -270,17 +266,10 @@ export default {
   top: -350px;
   right: -140px;
 }
-
 .imgPokemon {
   width: 100px;
   height: 100px;
   position: absolute;
-  transform: scale(1);
-  transition: transform 0.3s;
-  filter: brightness(1);
-}
-.imgPokemon:hover {
-  transform: scale(1.5);
 }
 .error {
   position: absolute;

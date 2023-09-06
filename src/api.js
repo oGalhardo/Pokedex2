@@ -11,17 +11,17 @@ export async function getNamePokemon(identifier) {
   const poke = await getPokemon(identifier)
   return poke.name
 }
-export  function getIdForImgPokemon(img){
+export function getIdForImgPokemon(img) {
   const part = img.split('/')
   const idForPart = part[part.length - 1]
-  const id = idForPart.split(".")
+  const id = idForPart.split('.')
   return id[0]
 }
 //Metódos Species
 export async function getSpecies(identifier) {
   return await getFromAPI('pokemon-species', identifier)
 }
-export async function getSpeciesEvo(identifier){
+export async function getSpeciesEvo(identifier) {
   const poke = await getSpecies(identifier)
   return poke.generation.name
 }
@@ -29,7 +29,7 @@ export async function getUrlEvolution(identifier) {
   const poke = await getSpecies(identifier)
   return poke.evolution_chain.url
 }
-export async function getFormDescription(id){
+export async function getFormDescription(id) {
   const poke = await getSpecies(id)
   return poke.flavor_text_entries[0].flavor_text
 }
@@ -69,11 +69,11 @@ export async function getObjEvolutionForNomepoke(nomePoke) {
   const pokeObjEvo = await getObjEvolution(pokeIdEvo)
   return pokeObjEvo
 }
-export async function getSpritesOfEvo(evos){
+export async function getSpritesOfEvo(evos) {
   var spritesEvo = []
-  evos.forEach(e => {
+  evos.forEach((e) => {
     spritesEvo.push(getImage(e))
-  });
+  })
   return Promise.all(spritesEvo)
 }
 //Metódos de verificação
@@ -99,13 +99,17 @@ export function checkEvo(evo, poke) {
     return 1
   }
 }
-//Metódos para complexo da Pokedex//
-export async function getInfoPlusPoke(identifier){
+//Metódos completos da Pokedex//
+export async function getInfoPlusPoke(identifier) {
   const informations = []
+  informations.push(await evolutionChain(identifier.name))
   informations.push(identifier.types[0].type.name)
+  informations.push(await getUrlEvolution(identifier.id))
+  informations.push(await getIdEvolutionChain(informations[2]))
   informations.push(await getSpeciesEvo(identifier.id))
-  const textPoke = (await getFormDescription(identifier.id))
-  informations.push(textPoke)
+  const textPoke = await getFormDescription(identifier.id)
+  informations.push(await textPoke)
+  informations.push(await getSpritesOfEvo(informations[0]))
   return Promise.all(informations)
 }
 export async function evolutionChain(evolutionData) {
@@ -133,11 +137,23 @@ export async function getAttPokemon(poke, option) {
   }
 }
 
+export async function getOrderPokeFromGen(gen){
+  const idOrderPoke = []
+  const quantArrayGen = await getGenerationQuant(gen)
+  for (var i = 0; i < quantArrayGen; i++) {
+    idOrderPoke.push(await getIdPokeArrayGen(gen, i))
+  }
+  return Promise.all(idOrderPoke)
+}
 export async function getPokemonsOfGeneration(gen) {
   const sprites = []
   const quantArrayGen = await getGenerationQuant(gen)
+  const idPokeGen = await getOrderPokeFromGen(gen)
+  idPokeGen.sort(function(a, b) {
+    return a - b;
+  });
   for (var i = 0; i < quantArrayGen; i++) {
-    sprites.push(getImage(await getIdPokeArrayGen(gen, i)))
+    sprites.push(getImage(idPokeGen[i]))
   }
   return Promise.all(sprites)
 }
