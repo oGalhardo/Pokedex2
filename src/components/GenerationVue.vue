@@ -1,5 +1,5 @@
 <template>
-  <div v-if="num === 1">
+  <div class="genAll" v-if="num === 1">
     <h2>Generation:{{ idGen }}</h2>
     <div class="button-container">
       <button @click="attGeneration(idGen - 1)">&#8592;</button>
@@ -54,7 +54,17 @@ export default {
   }
 }
 </script>
-<style>
+<style scoped>
+.genAll{
+  width: 115px;
+  height: 115px;
+  top: 86px;
+  right: 92px;
+  transform: scale(1);
+  cursor: pointer;
+  transition: transform 0.3s;
+
+}
 h2 {
   flex-direction: column;
 }
@@ -62,7 +72,6 @@ button {
   background: transparent;
   font-size: 20px;
 }
-
 .pokeInGen {
   width: 115px;
   height: 115px;
@@ -82,12 +91,13 @@ button {
   height: 500px;
   object-position: left top;
   position: absolute;
+  right: 100px;
+
 }
 ::-webkit-scrollbar-track {
   display: none;
 }
 
-/* Estilos adicionais para a barra de rolagem */
 ::-webkit-scrollbar {
   width: 10px;
 }

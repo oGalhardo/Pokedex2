@@ -1,6 +1,5 @@
 <template>
-  <div class="all">
-    <img src="imgs" alt="" />
+  <div id="container-imagem" :style="{ backgroundImage: backType }">
     <button class="buttonOn" @click="pokedexOn(1)" v-if="open != 1"></button>
     <button class="buttonOff" @click="pokedexOn(0)" v-else></button>
     <div class="dexGen" v-if="open != 0">
@@ -71,6 +70,7 @@
 import { getPokemon, getAttPokemon, checkEvo, getInfoPlusPoke } from '../api'
 import GenerationVue from './GenerationVue.vue'
 import { usePokemonStore } from '../store/pokemonStore'
+
 export default {
   name: 'PokedexVue',
   props: ['num'],
@@ -86,7 +86,8 @@ export default {
       objInfoPoke: '',
       menuInfo: 'none',
       icon: '+',
-      isLoading: true
+      isLoading: true,
+      backType: 'url(../public/img/backgroundsType/normal.png)'
     }
   },
   components: {
@@ -143,7 +144,8 @@ export default {
     },
     async infoPlus(poke) {
       this.objInfoPoke = await getInfoPlusPoke(poke, this.evoChain)
-      this.idPokeInEvo = await this.objInfoPoke[0].indexOf(poke.name)
+      this.idPokeInEvo = this.objInfoPoke[0].indexOf(poke.name)
+      this.backType = `url(../public/img/backgroundsType/${this.objInfoPoke[1]}.png)`
     },
     async attPoke(poke, option) {
       if (checkEvo(option, poke)) {
@@ -172,7 +174,21 @@ export default {
   }
 }
 </script>
-<style>
+<style scoped>
+.pokedex{
+  left: 100px;
+  position: absolute;
+}
+#container-imagem {
+  position: relative;
+  left: -315px;
+  height: 100vh;
+  width: 100vw;
+  background-image: url(../public/img/backgroundsType/normal.png);
+  background-size: cover;
+  display: flex;
+  justify-content: center;
+}
 .infoPoke {
   width: 150px;
   height: 100px;
@@ -182,6 +198,22 @@ export default {
   position: absolute;
   overflow-y: scroll;
   background: transparent;
+}
+::-webkit-scrollbar-track {
+  display: none;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
 }
 .butMoreInfoPoke {
   position: absolute;
@@ -255,12 +287,7 @@ export default {
   transform: rotate(-2deg);
   color: rgb(4, 209, 4);
 }
-.all {
-  background: transparent;
-  position: absolute;
-  left: 250px;
-  bottom: -300px;
-}
+
 .pokemon {
   position: relative;
   top: -350px;
@@ -342,18 +369,20 @@ input {
   transform: rotate(-2.6deg);
 }
 .buttonOff {
-  position: relative;
-  right: -60px;
-  top: 420px;
-  border-radius: 25px;
-  height: 35px;
-  width: 35px;
+  position: absolute;
+  left: 159px;
+  top: 38.92%;
+  height: 36px;
+  width: 36px;
   background: transparent;
+  border-radius: 25px;
+  z-index:1;
+
 }
 .buttonOn {
-  position: relative;
-  top: 340px;
-  right: -95px;
+  position: absolute;
+  left: 42.699%;
+  top: 29%;
   height: 50px;
   width: 20px;
   background: transparent;

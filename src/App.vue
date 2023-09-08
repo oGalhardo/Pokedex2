@@ -2,10 +2,9 @@
   <pokedex-vue />
 </template>
 <script>
-import PokedexVue from './components/PokedexVue.vue';
-
+import PokedexVue from './components/PokedexVue.vue'
 export default {
-  components: {  PokedexVue },
+  components: { PokedexVue },
   name: 'App'
 }
 </script>
