@@ -1,4 +1,6 @@
+
 const BASE_API = 'https://pokeapi.co/api/v2'
+
 //Metódos Pokemons
 export async function getPokemon(pokemon) {
   return await getFromAPI('pokemon', pokemon)
@@ -99,11 +101,15 @@ export function checkEvo(evo, poke) {
     return 1
   }
 }
+export function getTypesPoke(poke) {
+  const pokeTypes = poke.map(item => item.type.name)
+  return pokeTypes
+}
 //Metódos completos da Pokedex//
 export async function getInfoPlusPoke(identifier) {
   const informations = []
   informations.push(await evolutionChain(identifier.name))
-  informations.push(identifier.types[0].type.name)
+  informations.push(getTypesPoke(identifier.types))
   informations.push(await getUrlEvolution(identifier.id))
   informations.push(await getIdEvolutionChain(informations[2]))
   informations.push(await getSpeciesEvo(identifier.id))
@@ -137,7 +143,7 @@ export async function getAttPokemon(poke, option) {
   }
 }
 
-export async function getOrderPokeFromGen(gen){
+export async function getOrderPokeFromGen(gen) {
   const idOrderPoke = []
   const quantArrayGen = await getGenerationQuant(gen)
   for (var i = 0; i < quantArrayGen; i++) {
@@ -149,9 +155,9 @@ export async function getPokemonsOfGeneration(gen) {
   const sprites = []
   const quantArrayGen = await getGenerationQuant(gen)
   const idPokeGen = await getOrderPokeFromGen(gen)
-  idPokeGen.sort(function(a, b) {
-    return a - b;
-  });
+  idPokeGen.sort(function (a, b) {
+    return a - b
+  })
   for (var i = 0; i < quantArrayGen; i++) {
     sprites.push(getImage(idPokeGen[i]))
   }

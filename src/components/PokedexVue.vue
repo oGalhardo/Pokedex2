@@ -4,7 +4,7 @@
     <button class="buttonOff" @click="pokedexOn(0)" v-else></button>
     <div class="dexGen" v-if="open != 0">
       <div class="pokedex">
-        <img src="../../public/img/Pok_dex_Kanto_1.png" />
+        <img class="imgPokedex" src="../../public/img/Pok_dex_Kanto_1.png" />
         <div class="searchPokeMenu">
           <p id="msg">Type the Pokemon</p>
           <br />
@@ -27,13 +27,17 @@
               />
               <div class="loader" :style="{ display: load }"></div>
               <div class="infoPoke" :style="{ display: menuInfo }">
-                <p>Type:{{ objInfoPoke[1] }}</p>
+                Type:
+                <p v-for="typePoke in objInfoPoke[1]" :key="typePoke">
+                  <img class="imgIconType" :src="`../../public/img/icons/${typePoke}.ico`" />
+                </p>
                 <br />-------<br />
-                <p>Gen:{{ objInfoPoke[4] }}</p>
+                <p>Gen: {{ objInfoPoke[4] }}</p>
                 <br />-------<br />
-                <p>Descri:{{ objInfoPoke[5] }}</p>
-                <br />-------<br />
+                <p>Descri: {{ objInfoPoke[5] }}</p>
+                <br />------<br />
                 <p>EvoChain:</p>
+                <br />
                 <p v-for="sprite in objInfoPoke[6]" :key="sprite"><img :src="sprite" /></p>
               </div>
             </div>
@@ -62,7 +66,10 @@
       <GenerationVue class="clasGen" v-bind:num="open" />
     </div>
     <div v-else>
-      <img src="../../public/img/Kanto_Pok%3Fdex_Infobox-PhotoRoom.png-PhotoRoom.png" />
+      <img
+        class="imgPokedex"
+        src="../../public/img/Kanto_Pok%3Fdex_Infobox-PhotoRoom.png-PhotoRoom.png"
+      />
     </div>
   </div>
 </template>
@@ -87,7 +94,7 @@ export default {
       menuInfo: 'none',
       icon: '+',
       isLoading: true,
-      backType: 'url(../public/img/backgroundsType/normal.png)'
+      backType: 'url(../public/img/backgroundsType/start.png)',
     }
   },
   components: {
@@ -145,7 +152,7 @@ export default {
     async infoPlus(poke) {
       this.objInfoPoke = await getInfoPlusPoke(poke, this.evoChain)
       this.idPokeInEvo = this.objInfoPoke[0].indexOf(poke.name)
-      this.backType = `url(../public/img/backgroundsType/${this.objInfoPoke[1]}.png)`
+      this.backType = `url(../public/img/backgroundsType/${this.objInfoPoke[1][0]}.png)`
     },
     async attPoke(poke, option) {
       if (checkEvo(option, poke)) {
@@ -175,29 +182,39 @@ export default {
 }
 </script>
 <style scoped>
-.pokedex{
+.imgIconType{
+  height: 25px;
+}
+.pokedex {
   left: 100px;
   position: absolute;
+  top: 15%;
+}
+.imgPokedex {
+  height: 650px;
 }
 #container-imagem {
   position: relative;
-  left: -315px;
+  left: -350px;
   height: 100vh;
   width: 100vw;
-  background-image: url(../public/img/backgroundsType/normal.png);
+  background-image: url(../public/img/backgroundsType/start.png);
   background-size: cover;
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 .infoPoke {
-  width: 150px;
-  height: 100px;
+  width: 200px;
+  height: 130px;
   top: -20px;
-  transform: rotate(-0.5deg);
+  transform: rotate(1deg);
   left: -35px;
   position: absolute;
   overflow-y: scroll;
   background: transparent;
+  color: rgb(4, 209, 4);
+  font-weight: bold;
 }
 ::-webkit-scrollbar-track {
   display: none;
@@ -217,8 +234,8 @@ export default {
 }
 .butMoreInfoPoke {
   position: absolute;
-  left: 95px;
-  top: 87px;
+  left: 130px;
+  top: 110px;
   width: 50px;
   height: 33px;
   transform: rotate(-1deg);
@@ -279,8 +296,8 @@ export default {
   }
 }
 .loadInfo {
-  position: absolute;
-  left: 5px;
+  position: inherit;
+  left: px;
   bottom: -30px;
   width: 40px;
   height: 32px;
@@ -289,21 +306,19 @@ export default {
 }
 
 .pokemon {
-  position: relative;
-  top: -350px;
-  right: -140px;
+  bottom: 455px;
+  position: absolute;
+  left: 170px;
 }
 .imgPokemon {
-  width: 100px;
-  height: 100px;
+  width: 105px;
+  height: 105px;
   position: absolute;
 }
 .error {
   position: absolute;
   background: transparent;
   display: inline;
-  top: 20x;
-  right: 600px;
   transform: rotate(-1deg);
 }
 .dexGen {
@@ -311,39 +326,40 @@ export default {
 }
 .dpad {
   position: relative;
-  top: 110px;
+  top: 80px;
+  left: 62px;
 }
 .buttonBack {
   background: transparent;
   position: relative;
   top: -285px;
-  right: -225px;
-  height: 25px;
-  width: 25px;
+  right: -215px;
+  height: 30px;
+  width: 30px;
 }
 .buttonNext {
   background: transparent;
   position: relative;
-  top: -285px;
+  top: -288px;
   right: -250px;
-  height: 25px;
-  width: 25px;
+  height: 30px;
+  width: 30px;
 }
 .buttonEvolue {
   background: transparent;
   position: relative;
-  top: -310px;
-  right: -175px;
-  height: 25px;
-  width: 25px;
+  top: -320px;
+  right: -157px;
+  height: 30px;
+  width: 30px;
 }
 .buttonInvolue {
   background: transparent;
   position: relative;
-  top: -260px;
-  right: -200px;
-  height: 25px;
-  width: 25px;
+  top: -250px;
+  right: -187px;
+  height: 30px;
+  width: 30px;
 }
 p {
   display: inline;
@@ -361,8 +377,8 @@ input {
 }
 .searchPokeMenu {
   position: relative;
-  top: -360px;
-  right: -415px;
+  top: -440px;
+  right: -515px;
   font-size: 15px;
   color: rgb(12, 215, 12);
   width: 200px;
@@ -370,22 +386,21 @@ input {
 }
 .buttonOff {
   position: absolute;
-  left: 159px;
-  top: 38.92%;
-  height: 36px;
-  width: 36px;
+  left: 175px;
+  top: 628px;
+  height: 40px;
+  width: 40px;
   background: transparent;
-  border-radius: 25px;
-  z-index:1;
-
+  border-radius: 30px;
+  z-index: 1;
 }
 .buttonOn {
   position: absolute;
-  left: 42.699%;
-  top: 29%;
-  height: 50px;
-  width: 20px;
+  left: 41.5%;
+  top: 51.5%;
+  height: 55px;
+  width: 30px;
   background: transparent;
-  transform: rotate(-20deg);
+  transform: rotate(-19deg);
 }
 </style>

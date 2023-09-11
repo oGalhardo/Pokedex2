@@ -1,7 +1,7 @@
 <template>
   <div class="genAll" v-if="num === 1">
-    <h2>Generation:{{ idGen }}</h2>
-    <div class="button-container">
+    <div class="topGen">
+      <h2>Generation:{{ idGen }}</h2>
       <button @click="attGeneration(idGen - 1)">&#8592;</button>
       <button @click="attGeneration(idGen + 1)">&#8594;</button>
     </div>
@@ -23,7 +23,7 @@
 </template>
 <script>
 import { getPokemonsOfGeneration, checkGeneration, getIdForImgPokemon } from '../api'
-import { usePokemonStore} from '../store/pokemonStore'
+import { usePokemonStore } from '../store/pokemonStore'
 export default {
   name: 'GenerationVue',
   props: ['num'],
@@ -55,31 +55,34 @@ export default {
 }
 </script>
 <style scoped>
-.genAll{
-  width: 115px;
-  height: 115px;
-  top: 86px;
-  right: 92px;
-  transform: scale(1);
-  cursor: pointer;
-  transition: transform 0.3s;
+.topGen{
+  position: relative;
+  right: 700px;
+  top: -15px
+}
+.topGen button {
+    background-color: transparent;
+    font-size: 20px;
+  }
+.genAll {
+  position: absolute;
+  right: 10px;
+  top: 230px;
+}
+.initialGen {
+  position: absolute;
+  right: 700px;
+  top: -100px;
+}
 
-}
-h2 {
-  flex-direction: column;
-}
-button {
-  background: transparent;
-  font-size: 20px;
-}
 .pokeInGen {
   width: 115px;
   height: 115px;
-  top: 86px;
-  right: 92px;
+  right: 160px;
   transform: scale(1);
   cursor: pointer;
   transition: transform 0.3s;
+  overflow: visible;
 }
 .pokeInGen:hover {
   transform: scale(1.5);
@@ -92,7 +95,7 @@ button {
   object-position: left top;
   position: absolute;
   right: 100px;
-
+  padding: 25px;
 }
 ::-webkit-scrollbar-track {
   display: none;
