@@ -105,6 +105,7 @@ export function getTypesPoke(poke) {
   const pokeTypes = poke.map(item => item.type.name)
   return pokeTypes
 }
+
 //Metódos completos da Pokedex//
 export async function getInfoPlusPoke(identifier) {
   const informations = []

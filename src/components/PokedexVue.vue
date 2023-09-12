@@ -22,7 +22,7 @@
               <img
                 :src="objPokemon.sprites.front_default"
                 alt="Pokemon non existe"
-                class="imgPokemon"
+                :class="{ whiteSprite: isWhiteSprite }"
                 :style="{ display: imageDisplay }"
               />
               <div class="loader" :style="{ display: load }"></div>
@@ -45,19 +45,19 @@
           <p class="error">{{ error }}</p>
         </div>
         <div class="dpad">
-          <button
+          <button :disabled="isLoading"
             @click="attPoke(objPokemon.id, parseInt(objInfoPoke[3]) - 1)"
             class="buttonBack"
           ></button>
-          <button
+          <button :disabled="isLoading"
             @click="attPoke(objPokemon.id, parseInt(objInfoPoke[3]) + 1)"
             class="buttonNext"
           ></button>
-          <button
+          <button :disabled="isLoading"
             @click="attPoke(parseInt(idPokeInEvo) - 1, objInfoPoke[0])"
             class="buttonInvolue"
           ></button>
-          <button
+          <button :disabled="isLoading"
             @click="attPoke(parseInt(idPokeInEvo) + 1, objInfoPoke[0])"
             class="buttonEvolue"
           ></button>
@@ -95,6 +95,7 @@ export default {
       icon: '+',
       isLoading: true,
       backType: 'url(../public/img/backgroundsType/start.png)',
+      isWhiteSprite: false
     }
   },
   components: {
@@ -116,9 +117,10 @@ export default {
       if (n == 0) {
         this.objPokemon = ''
         this.isLoading = true
+        this.backType = 'url(../public/img/backgroundsType/start.png)'
       }
     },
-    hideImageForSeconds(seconds, msg) {
+   hideImageForSeconds(seconds, msg) {
       this.imageDisplay = 'none'
       if (msg != 'await') {
         this.error = msg
@@ -136,17 +138,25 @@ export default {
         }, seconds * 1000)
       }
     },
+    // this.isLoading = true
+    //     this.isWhiteSprite = !this.isWhiteSprite
+    //     setTimeout(() => {
+    //       this.isWhiteSprite = !this.isWhiteSprite
+    //       this.isLoading = false
+    //     }, seconds * 1000)
     async searchPokemon(nomePokemon) {
       this.nome = ''
       this.menuInfo = 'none'
       this.icon = '+'
       this.objPokemon = await getPokemon(nomePokemon)
       if (this.objPokemon != undefined) {
-        this.hideImageForSeconds(1.5, 'await')
+        this.hideImageForSeconds(2.0, 'await')
         this.error = ''
         await this.infoPlus(this.objPokemon)
       } else {
-        this.hideImageForSeconds(1.5, 'Pokemon not found')
+        setInterval(function () {
+          this.hideImageForSeconds(1.5, 'Pokemon not found')
+        }, 5000)
       }
     },
     async infoPlus(poke) {
@@ -182,7 +192,7 @@ export default {
 }
 </script>
 <style scoped>
-.imgIconType{
+.imgIconType {
   height: 25px;
 }
 .pokedex {
@@ -315,6 +325,9 @@ export default {
   height: 105px;
   position: absolute;
 }
+.whiteSprite {
+  filter: brightness(0) invert(1) grayscale(100%);
+}
 .error {
   position: absolute;
   background: transparent;
@@ -387,7 +400,7 @@ input {
 .buttonOff {
   position: absolute;
   left: 175px;
-  top: 628px;
+  top: 625px;
   height: 40px;
   width: 40px;
   background: transparent;
@@ -396,7 +409,7 @@ input {
 }
 .buttonOn {
   position: absolute;
-  left: 41.5%;
+  left: 41%;
   top: 51.5%;
   height: 55px;
   width: 30px;

@@ -90,7 +90,7 @@ export default {
 .pokeGen {
   overflow-y: scroll;
   background-color: transparent;
-  width: 750px;
+  width: 760px;
   height: 500px;
   object-position: left top;
   position: absolute;
