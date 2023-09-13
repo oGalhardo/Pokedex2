@@ -8,7 +8,7 @@
         <div class="searchPokeMenu">
           <p id="msg">Type the Pokemon</p>
           <br />
-          <input type="text" v-model="nome"  @keyup.enter="searchPokemon(nome)" />
+          <input type="text" v-model="nome" @keyup.enter="searchPokemon(nome)" />
         </div>
         <div class="pokemon">
           <button class="butMoreInfoPoke" :disabled="isLoading" @click="mostInfoPoke">
@@ -16,7 +16,7 @@
           </button>
           <div class="loadInfo" v-if="error == ''">
             <div v-if="objPokemon">
-              <div class="nomePoke" :style="{ display: imageDisplay }">
+              <div class="nomePoke" v-if="!isWhiteSprite" :style="{ display: imageDisplay }">
                 Name: {{ objPokemon.name }}
               </div>
               <img
@@ -169,7 +169,7 @@ export default {
       this.icon = '+'
       this.objPokemon = await getPokemon(nomePokemon)
       if (this.objPokemon != undefined) {
-        if (this.objInfoPoke != '') {
+        if (this.oldSprite != '' && this.objInfoPoke[0].includes(nomePokemon)) {
           this.hideImageForSeconds(0, 'evo')
         } else {
           this.hideImageForSeconds(2.0, 'await')
