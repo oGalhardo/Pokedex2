@@ -8,7 +8,7 @@
         <div class="searchPokeMenu">
           <p id="msg">Type the Pokemon</p>
           <br />
-          <input type="text" v-model="nome" @keyup.enter="searchPokemon(nome)" />
+          <input type="text" v-model="nome"  @keyup.enter="searchPokemon(nome)" />
         </div>
         <div class="pokemon">
           <button class="butMoreInfoPoke" :disabled="isLoading" @click="mostInfoPoke">
@@ -20,7 +20,7 @@
                 Name: {{ objPokemon.name }}
               </div>
               <img
-                :src="objPokemon.sprites.front_default"
+                :src="newSprite"
                 alt="Pokemon non existe"
                 :class="{ whiteSprite: isWhiteSprite }"
                 :style="{ display: imageDisplay }"
@@ -45,19 +45,23 @@
           <p class="error">{{ error }}</p>
         </div>
         <div class="dpad">
-          <button :disabled="isLoading"
+          <button
+            :disabled="isLoading"
             @click="attPoke(objPokemon.id, parseInt(objInfoPoke[3]) - 1)"
             class="buttonBack"
           ></button>
-          <button :disabled="isLoading"
+          <button
+            :disabled="isLoading"
             @click="attPoke(objPokemon.id, parseInt(objInfoPoke[3]) + 1)"
             class="buttonNext"
           ></button>
-          <button :disabled="isLoading"
+          <button
+            :disabled="isLoading"
             @click="attPoke(parseInt(idPokeInEvo) - 1, objInfoPoke[0])"
             class="buttonInvolue"
           ></button>
-          <button :disabled="isLoading"
+          <button
+            :disabled="isLoading"
             @click="attPoke(parseInt(idPokeInEvo) + 1, objInfoPoke[0])"
             class="buttonEvolue"
           ></button>
@@ -95,7 +99,10 @@ export default {
       icon: '+',
       isLoading: true,
       backType: 'url(../public/img/backgroundsType/start.png)',
-      isWhiteSprite: false
+      isWhiteSprite: false,
+      oldSprite: '',
+      newSprite: '',
+      nIntervalId: ''
     }
   },
   components: {
@@ -120,15 +127,9 @@ export default {
         this.backType = 'url(../public/img/backgroundsType/start.png)'
       }
     },
-   hideImageForSeconds(seconds, msg) {
+    hideImageForSeconds(seconds, msg) {
       this.imageDisplay = 'none'
-      if (msg != 'await') {
-        this.error = msg
-        setTimeout(() => {
-          this.imageDisplay = 'block'
-          this.error = ''
-        }, seconds * 1000)
-      } else {
+      if (msg == 'await') {
         this.isLoading = true
         this.load = 'block'
         setTimeout(() => {
@@ -136,27 +137,48 @@ export default {
           this.isLoading = false
           this.load = 'none'
         }, seconds * 1000)
+      } else if (msg == 'evo') {
+        this.imageDisplay = 'block'
+        this.flashSprite()
+        setTimeout(() => {
+          this.isWhiteSprite = false
+          this.newSprite = this.objPokemon.sprites.front_default
+          clearInterval(this.nIntervalId)
+        }, 2500)
+      } else {
+        this.error = msg
+        setTimeout(() => {
+          this.imageDisplay = 'block'
+          this.error = ''
+        }, seconds * 1000)
       }
     },
-    // this.isLoading = true
-    //     this.isWhiteSprite = !this.isWhiteSprite
-    //     setTimeout(() => {
-    //       this.isWhiteSprite = !this.isWhiteSprite
-    //       this.isLoading = false
-    //     }, seconds * 1000)
+    flashSprite() {
+      this.isWhiteSprite = true
+      this.nIntervalId = setInterval(() => {
+        if (this.newSprite == this.oldSprite) {
+          this.newSprite = this.objPokemon.sprites.front_default
+        } else {
+          this.newSprite = this.oldSprite
+        }
+      }, 500)
+    },
     async searchPokemon(nomePokemon) {
       this.nome = ''
       this.menuInfo = 'none'
       this.icon = '+'
       this.objPokemon = await getPokemon(nomePokemon)
       if (this.objPokemon != undefined) {
-        this.hideImageForSeconds(2.0, 'await')
+        if (this.objInfoPoke != '') {
+          this.hideImageForSeconds(0, 'evo')
+        } else {
+          this.hideImageForSeconds(2.0, 'await')
+        }
+        this.newSprite = this.objPokemon.sprites.front_default
         this.error = ''
         await this.infoPlus(this.objPokemon)
       } else {
-        setInterval(function () {
-          this.hideImageForSeconds(1.5, 'Pokemon not found')
-        }, 5000)
+        this.hideImageForSeconds(1.5, 'Pokemon not found')
       }
     },
     async infoPlus(poke) {
@@ -167,8 +189,8 @@ export default {
     async attPoke(poke, option) {
       if (checkEvo(option, poke)) {
         const updatedPokemon = await getAttPokemon(poke, option)
-        this.hideImageForSeconds(1.5, 'await')
         if (updatedPokemon) {
+          this.oldSprite = this.objPokemon.sprites.front_default
           this.searchPokemon(updatedPokemon)
         } else {
           this.hideImageForSeconds(1.5, 'No more Evo')
