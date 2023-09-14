@@ -1,4 +1,3 @@
-
 const BASE_API = 'https://pokeapi.co/api/v2'
 
 //Metódos Pokemons
@@ -19,6 +18,7 @@ export function getIdForImgPokemon(img) {
   const id = idForPart.split('.')
   return id[0]
 }
+
 //Metódos Species
 export async function getSpecies(identifier) {
   return await getFromAPI('pokemon-species', identifier)
@@ -102,11 +102,29 @@ export function checkEvo(evo, poke) {
   }
 }
 export function getTypesPoke(poke) {
-  const pokeTypes = poke.map(item => item.type.name)
+  const pokeTypes = poke.map((item) => item.type.name)
   return pokeTypes
 }
-
 //Metódos completos da Pokedex//
+export function getIdOfPokesGen(gen) {
+  const idOfPokeGen = []
+  for (var i = 0; i < gen.length; i++) {
+    idOfPokeGen.push(getIdForImgPokemon(gen[i]))
+  }
+  return idOfPokeGen
+}
+export async function getTypesOfIdPokeGen(pokeGenId) {
+  const ids = getIdOfPokesGen(pokeGenId)
+  const typesOfGen = []
+  for (var i = 0; i < ids.length; i++) {
+    const poke = await getPokemon(ids[i])
+    const typePoke = getTypesPoke(poke.types)
+    if (!typesOfGen.includes(typePoke[0])) {
+      typesOfGen.push(typePoke[0])
+    }
+  }
+  return typesOfGen
+}
 export async function getInfoPlusPoke(identifier) {
   const informations = []
   informations.push(await evolutionChain(identifier.name))

@@ -1,9 +1,20 @@
 <template>
   <div class="genAll" v-if="num === 1">
     <div class="topGen">
+      Fazer o filtro e concertar searchPokemon está se mexendo, n é pra se mexer
       <h2>Generation:{{ idGen }}</h2>
       <button @click="attGeneration(idGen - 1)">&#8592;</button>
       <button @click="attGeneration(idGen + 1)">&#8594;</button>
+      <div v-if="types != ''" :class="{ checkBoxList: true, 'right-align': num === 1 }">
+        <button class="searchButtonType" :disabled="selectedTypes==''" @click="setTypesForGen([selectedTypes])">
+          Search for Type
+        </button>
+        <label v-for="typePoke in types" :key="typePoke">
+          <input type="checkbox" v-model="selectedTypes" :value="typePoke" />
+          <img class="imgIconTypeInGen" :src="`../../public/img/icons/${typePoke}.ico`" />
+        </label>
+      </div>
+      <div class="loadTypes" v-else>Loading Types...</div>
     </div>
     <div class="pokeGen">
       <div v-if="allGenPokemon != ''">
@@ -22,7 +33,13 @@
   <div v-else></div>
 </template>
 <script>
-import { getPokemonsOfGeneration, checkGeneration, getIdForImgPokemon } from '../api'
+import {
+  getPokemonsOfGeneration,
+  checkGeneration,
+  getIdForImgPokemon,
+  getTypesOfIdPokeGen,
+  // getPokemonsTypesGen
+} from '../api'
 import { usePokemonStore } from '../store/pokemonStore'
 export default {
   name: 'GenerationVue',
@@ -30,8 +47,11 @@ export default {
   data() {
     return {
       allGenPokemon: [],
+      selectedTypes: [],
       idGen: 1,
-      pokeForPokedex: ''
+      pokeForPokedex: '',
+      selectedPoke: '',
+      types: ''
     }
   },
   methods: {
@@ -40,6 +60,7 @@ export default {
         this.idGen = gen
         this.allGenPokemon = []
         this.allGenPokemon = await getPokemonsOfGeneration(gen)
+        this.types = await getTypesOfIdPokeGen(this.allGenPokemon)
       } else {
         alert('Não existe mais gerações')
       }
@@ -47,23 +68,58 @@ export default {
     setPokeInPokedex(pokemoImg) {
       this.pokeForPokedex = getIdForImgPokemon(pokemoImg)
       usePokemonStore().setPokemonGen(this.pokeForPokedex)
+    },
+    async setTypesForGen(typesPokemons) {
+      this.allGenPokemon = await getPokemonsTypesGen(typesPokemons)
     }
   },
   async beforeMount() {
     this.allGenPokemon = await getPokemonsOfGeneration(this.idGen)
+    this.types = await getTypesOfIdPokeGen(this.allGenPokemon)
   }
 }
 </script>
 <style scoped>
-.topGen{
+.loadTypes{
+  left: 70px; /* Ajuste a posição horizontal conforme necessário */
+  top: 610px;
+  position: absolute;
+}
+.imgIconTypeInGen {
+  height: 30px;
+  width: 30px;
+  background: black;
+}
+.searchButtonType {
+  position: absolute;
+  left: -182px;
+  bottom: 36px;
+  background: transparent;
+}
+.checkBoxList {
+  text-align: justify; /* Justifica o conteúdo dentro do contêiner */
+  position: absolute;
+  left: 70px; /* Ajuste a posição horizontal conforme necessário */
+  top: 610px; /* Ajuste a posição vertical conforme necessário */
+  width: 607px; /* Define a largura do contêiner para ocupar toda a largura disponível */
+}
+
+.checkBoxList label {
+  text-align: left; /* Alinha o texto dos rótulos à esquerda */
+  padding-right: 7px;
+  display: inline-block;
+  width: 120px;
+}
+
+.topGen {
   position: relative;
   right: 700px;
-  top: -15px
+  top: -15px;
 }
 .topGen button {
-    background-color: transparent;
-    font-size: 20px;
-  }
+  background-color: transparent;
+  font-size: 20px;
+}
 .genAll {
   position: absolute;
   right: 10px;
