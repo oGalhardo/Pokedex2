@@ -1,17 +1,25 @@
 <template>
   <div class="genAll" v-if="num === 1">
     <div class="topGen">
-      Fazer o filtro e concertar searchPokemon está se mexendo, n é pra se mexer
       <h2>Generation:{{ idGen }}</h2>
       <button @click="attGeneration(idGen - 1)">&#8592;</button>
       <button @click="attGeneration(idGen + 1)">&#8594;</button>
-      <div v-if="types != ''" :class="{ checkBoxList: true, 'right-align': num === 1 }">
-        <button class="searchButtonType" :disabled="selectedTypes==''" @click="setTypesForGen([selectedTypes])">
+      <div v-if="allGenPokemon != ''" :class="{ checkBoxList: true, 'right-align': num === 1 }">
+        <button
+          class="searchButtonType"
+          :disabled="selectedTypes == ''"
+          @click="setTypesForGen([selectedTypes])"
+        >
           Search for Type
         </button>
         <label v-for="typePoke in types" :key="typePoke">
-          <input type="checkbox" v-model="selectedTypes" :value="typePoke" />
-          <img class="imgIconTypeInGen" :src="`../../public/img/icons/${typePoke}.ico`" />
+          <input
+            type="checkbox"
+            v-model="selectedTypes"
+            :value="typePoke"
+            @change.prevent="checkHandler()"
+          />
+          <img class="imgIconTypeInGen" :src="`../../public/img/icons/${typePoke}.ico`" alt="" />
         </label>
       </div>
       <div class="loadTypes" v-else>Loading Types...</div>
@@ -38,7 +46,7 @@ import {
   checkGeneration,
   getIdForImgPokemon,
   getTypesOfIdPokeGen,
-  // getPokemonsTypesGen
+  getPokeTypeSelected
 } from '../api'
 import { usePokemonStore } from '../store/pokemonStore'
 export default {
@@ -70,7 +78,13 @@ export default {
       usePokemonStore().setPokemonGen(this.pokeForPokedex)
     },
     async setTypesForGen(typesPokemons) {
-      this.allGenPokemon = await getPokemonsTypesGen(typesPokemons)
+      this.allGenPokemon = await getPokeTypeSelected(typesPokemons, this.allGenPokemon)
+    },
+    checkHandler() {
+      if (this.selectedTypes.length > 2) {
+        alert('Não existem pokemons com mais de 2 tipos')
+        this.selectedTypes.pop()
+      }
     }
   },
   async beforeMount() {
@@ -80,8 +94,8 @@ export default {
 }
 </script>
 <style scoped>
-.loadTypes{
-  left: 70px; /* Ajuste a posição horizontal conforme necessário */
+.loadTypes {
+  left: 70px;
   top: 610px;
   position: absolute;
 }
@@ -91,9 +105,9 @@ export default {
   background: black;
 }
 .searchButtonType {
-  position: absolute;
-  left: -182px;
-  bottom: 36px;
+  position: fixed;
+  right: 45%;
+  bottom: 10%;
   background: transparent;
 }
 .checkBoxList {

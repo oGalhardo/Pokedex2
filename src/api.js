@@ -18,7 +18,11 @@ export function getIdForImgPokemon(img) {
   const id = idForPart.split('.')
   return id[0]
 }
-
+export async function getIdPokemonUrl(url) {
+  const segments = await url.split('/')
+  const numeroDoPokemon = segments[segments.length - 2]
+  return numeroDoPokemon
+}
 //Metódos Species
 export async function getSpecies(identifier) {
   return await getFromAPI('pokemon-species', identifier)
@@ -32,9 +36,11 @@ export async function getUrlEvolution(identifier) {
   return poke.evolution_chain.url
 }
 export async function getFormDescription(id) {
+  console.log(id)
   const poke = await getSpecies(id)
   return poke.flavor_text_entries[0].flavor_text
 }
+
 //Metodos Generation
 export async function getGeneration(identifier) {
   return await getFromAPI('generation', identifier)
@@ -105,6 +111,37 @@ export function getTypesPoke(poke) {
   const pokeTypes = poke.map((item) => item.type.name)
   return pokeTypes
 }
+//METÓDOS TYPE
+export async function getType(typePoke) {
+  return await getFromAPI('type', typePoke)
+}
+export async function getQuantTypePoke(typeP) {
+  const typesPokemons = await getType(typeP)
+  const namesPokeOfId = []
+  for (var i = 0; i < typesPokemons.pokemon.length; i++) {
+    const url = await getNamePokeOfType(typeP, i)
+    const pokeId = getIdPokemonUrl(url)
+    namesPokeOfId.push(pokeId)
+  }
+  return Promise.all(namesPokeOfId)
+}
+export async function getPokeTypeSelected(tPoke, gen) {
+  const spritePoke = []
+  const genPokeId = getIdOfPokesGen(gen)
+  console.log(tPoke)
+  const pokeIdOfPokeID = await getQuantTypePoke(tPoke)
+  for (var i = 0; i < genPokeId.length; i++) {
+    if (genPokeId.includes(pokeIdOfPokeID[i])) {
+      spritePoke.push(await getImage(pokeIdOfPokeID[i]))
+    }
+  }
+  return spritePoke
+}
+export async function getNamePokeOfType(tPoke, i) {
+  console.log(tPoke)
+  const poke = await getType(tPoke)
+  return poke.pokemon[i].pokemon.url
+}
 //Metódos completos da Pokedex//
 export function getIdOfPokesGen(gen) {
   const idOfPokeGen = []
@@ -119,8 +156,9 @@ export async function getTypesOfIdPokeGen(pokeGenId) {
   for (var i = 0; i < ids.length; i++) {
     const poke = await getPokemon(ids[i])
     const typePoke = getTypesPoke(poke.types)
-    if (!typesOfGen.includes(typePoke[0])) {
+    if (!typesOfGen.includes(typePoke[0]) && !typesOfGen.includes(typePoke[1])) {
       typesOfGen.push(typePoke[0])
+      typesOfGen.push(typePoke[1])
     }
   }
   return typesOfGen
