@@ -1,4 +1,15 @@
 const BASE_API = 'https://pokeapi.co/api/v2'
+async function getFromAPI(path, identifier) {
+  return await fetch(`${BASE_API}/${path}/${identifier}/`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+    }
+  })
+    .then((data) => data.json())
+    .catch((err) => console.log(err))
+}
 
 //Metódos Pokemons
 export async function getPokemon(pokemon) {
@@ -7,6 +18,9 @@ export async function getPokemon(pokemon) {
 export async function getImage(identifier) {
   const poke = await getPokemon(identifier)
   return poke.sprites.front_default
+}
+export async function getSpriteOfPoke(identifier) {
+  return identifier.sprites.front_default
 }
 export async function getNamePokemon(identifier) {
   const poke = await getPokemon(identifier)
@@ -36,7 +50,6 @@ export async function getUrlEvolution(identifier) {
   return poke.evolution_chain.url
 }
 export async function getFormDescription(id) {
-  console.log(id)
   const poke = await getSpecies(id)
   return poke.flavor_text_entries[0].flavor_text
 }
@@ -59,7 +72,6 @@ export async function getGenerationQuant(id) {
   return poke.pokemon_species.length
 }
 
-//Metódos Evolution
 export async function getObjEvolution(identifier) {
   return await getFromAPI('evolution-chain', identifier)
 }
@@ -77,6 +89,10 @@ export async function getObjEvolutionForNomepoke(nomePoke) {
   const pokeObjEvo = await getObjEvolution(pokeIdEvo)
   return pokeObjEvo
 }
+export function getTypesPokeForPokedex(poke) {
+  const pokeTypes = poke.map((item) => item.type.name)
+  return pokeTypes
+}
 export async function getSpritesOfEvo(evos) {
   var spritesEvo = []
   evos.forEach((e) => {
@@ -84,7 +100,6 @@ export async function getSpritesOfEvo(evos) {
   })
   return Promise.all(spritesEvo)
 }
-//Metódos de verificação
 export function checkGeneration(id) {
   if (id < 1 || id > 9) {
     return 0
@@ -107,61 +122,74 @@ export function checkEvo(evo, poke) {
     return 1
   }
 }
-export function getTypesPoke(poke) {
-  const pokeTypes = poke.map((item) => item.type.name)
-  return pokeTypes
-}
-//METÓDOS TYPE
-export async function getType(typePoke) {
-  return await getFromAPI('type', typePoke)
-}
-export async function getQuantTypePoke(typeP) {
-  const typesPokemons = await getType(typeP)
-  const namesPokeOfId = []
-  for (var i = 0; i < typesPokemons.pokemon.length; i++) {
-    const url = await getNamePokeOfType(typeP, i)
-    const pokeId = getIdPokemonUrl(url)
-    namesPokeOfId.push(pokeId)
-  }
-  return Promise.all(namesPokeOfId)
+
+export function convertProxyInArray(proxyTpoke) {
+  const proxy = new Proxy([proxyTpoke[0][0], proxyTpoke[0][1]], {})
+  const array = Array.from(proxy)
+  return array
 }
 export async function getPokeTypeSelected(tPoke, gen) {
-  const spritePoke = []
-  const genPokeId = getIdOfPokesGen(gen)
-  console.log(tPoke)
-  const pokeIdOfPokeID = await getQuantTypePoke(tPoke)
-  for (var i = 0; i < genPokeId.length; i++) {
-    if (genPokeId.includes(pokeIdOfPokeID[i])) {
-      spritePoke.push(await getImage(pokeIdOfPokeID[i]))
+  const spritePromises = []
+  const objTpoke = convertProxyInArray(tPoke)
+  const ids = getIdOfPokesGen(gen)
+  for (var i = 0; i < ids.length; i++) {
+    spritePromises.push(getPokemonSprite(ids[i], objTpoke))
+  }
+  return Promise.all(spritePromises)
+    .then((results) => {
+      const filteredArray = results.filter((value) => value !== undefined)
+      return filteredArray
+    })
+    .catch((error) => {
+      console.error('Ocorreu um erro ao resolver as Promises:', error)
+    })
+}
+async function getPokemonSprite(id, objTpoke) {
+  const poke = await getPokemon(id)
+  const typePoke = getTypesPoke(poke.types)
+  if (objTpoke[1] == undefined) {
+    if (typePoke.includes(objTpoke[0])) {
+      return getSpriteOfPoke(poke)
+    }
+  } else {
+    if (typePoke.includes(objTpoke[0]) && typePoke.includes(objTpoke[1])) {
+      return getSpriteOfPoke(poke)
     }
   }
-  return spritePoke
 }
-export async function getNamePokeOfType(tPoke, i) {
-  console.log(tPoke)
-  const poke = await getType(tPoke)
-  return poke.pokemon[i].pokemon.url
-}
-//Metódos completos da Pokedex//
+
 export function getIdOfPokesGen(gen) {
   const idOfPokeGen = []
+  gen.map((id) => {
+    return getIdForImgPokemon(id)
+  })
   for (var i = 0; i < gen.length; i++) {
     idOfPokeGen.push(getIdForImgPokemon(gen[i]))
   }
   return idOfPokeGen
 }
+
 export async function getTypesOfIdPokeGen(pokeGenId) {
   const ids = getIdOfPokesGen(pokeGenId)
   const typesOfGen = []
   for (var i = 0; i < ids.length; i++) {
     const poke = await getPokemon(ids[i])
     const typePoke = getTypesPoke(poke.types)
-    if (!typesOfGen.includes(typePoke[0]) && !typesOfGen.includes(typePoke[1])) {
+    if (!typesOfGen.includes(typePoke[0])) {
       typesOfGen.push(typePoke[0])
+    }
+    if (!typesOfGen.includes(typePoke[1])) {
       typesOfGen.push(typePoke[1])
     }
   }
-  return typesOfGen
+  return typesOfGen.filter((tipo) => {
+    return tipo !== undefined
+  })
+}
+
+export function getTypesPoke(poke) {
+  const pokeTypes = poke.map((item) => item.type.name)
+  return pokeTypes
 }
 export async function getInfoPlusPoke(identifier) {
   const informations = []
@@ -199,7 +227,7 @@ export async function getAttPokemon(poke, option) {
     return pokeAtt
   }
 }
-
+//
 export async function getOrderPokeFromGen(gen) {
   const idOrderPoke = []
   const quantArrayGen = await getGenerationQuant(gen)
@@ -211,6 +239,7 @@ export async function getOrderPokeFromGen(gen) {
 export async function getPokemonsOfGeneration(gen) {
   const sprites = []
   const quantArrayGen = await getGenerationQuant(gen)
+  console.log(quantArrayGen)
   const idPokeGen = await getOrderPokeFromGen(gen)
   idPokeGen.sort(function (a, b) {
     return a - b
@@ -219,16 +248,4 @@ export async function getPokemonsOfGeneration(gen) {
     sprites.push(getImage(idPokeGen[i]))
   }
   return Promise.all(sprites)
-}
-
-async function getFromAPI(path, identifier) {
-  return await fetch(`${BASE_API}/${path}/${identifier}/`, {
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
-      // 'Content-Type': 'application/x-www-form-urlencoded',
-    }
-  })
-    .then((data) => data.json())
-    .catch((err) => console.log(err))
 }

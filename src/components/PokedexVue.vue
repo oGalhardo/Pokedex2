@@ -124,11 +124,11 @@ export default {
       if (n == 0) {
         this.objPokemon = ''
         this.isLoading = true
-        this.backType = 'url(../public/img/backgroundsType/start.png)'
       }
     },
     hideImageForSeconds(seconds, msg) {
       this.imageDisplay = 'none'
+      this.isLoading = true
       if (msg == 'await') {
         this.isLoading = true
         this.load = 'block'
@@ -136,6 +136,7 @@ export default {
           this.imageDisplay = 'block'
           this.isLoading = false
           this.load = 'none'
+          this.isLoading = false
         }, seconds * 1000)
       } else if (msg == 'evo') {
         this.imageDisplay = 'block'
@@ -143,6 +144,7 @@ export default {
         setTimeout(() => {
           this.isWhiteSprite = false
           this.newSprite = this.objPokemon.sprites.front_default
+          this.isLoading = false
           clearInterval(this.nIntervalId)
         }, 2500)
       } else {
@@ -150,6 +152,7 @@ export default {
         setTimeout(() => {
           this.imageDisplay = 'block'
           this.error = ''
+          this.isLoading = false
         }, seconds * 1000)
       }
     },
@@ -172,7 +175,7 @@ export default {
         if (this.oldSprite != '' && this.objInfoPoke[0].includes(nomePokemon)) {
           this.hideImageForSeconds(0, 'evo')
         } else {
-          this.hideImageForSeconds(2.0, 'await')
+          this.hideImageForSeconds(2.5, 'await')
         }
         this.newSprite = this.objPokemon.sprites.front_default
         this.error = ''
@@ -182,6 +185,7 @@ export default {
       }
     },
     async infoPlus(poke) {
+      console.log(poke.id)
       this.objInfoPoke = await getInfoPlusPoke(poke, this.evoChain)
       this.idPokeInEvo = this.objInfoPoke[0].indexOf(poke.name)
       this.backType = `url(../public/img/backgroundsType/${this.objInfoPoke[1][0]}.png)`

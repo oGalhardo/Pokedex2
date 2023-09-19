@@ -12,6 +12,7 @@
         >
           Search for Type
         </button>
+        <button class="backNormal" @click="comebackNormal">♻</button>
         <label v-for="typePoke in types" :key="typePoke">
           <input
             type="checkbox"
@@ -54,6 +55,7 @@ export default {
   props: ['num'],
   data() {
     return {
+      saveGenPoke: [],
       allGenPokemon: [],
       selectedTypes: [],
       idGen: 1,
@@ -62,6 +64,7 @@ export default {
       types: ''
     }
   },
+ 
   methods: {
     async attGeneration(gen) {
       if (checkGeneration(gen)) {
@@ -78,7 +81,14 @@ export default {
       usePokemonStore().setPokemonGen(this.pokeForPokedex)
     },
     async setTypesForGen(typesPokemons) {
-      this.allGenPokemon = await getPokeTypeSelected(typesPokemons, this.allGenPokemon)
+      this.allGenPokemon = await getPokeTypeSelected(typesPokemons, this.saveGenPoke)
+      if (this.allGenPokemon.length < 1) {
+        alert('Não existe essa combinação de pokemon')
+        this.allGenPokemon = this.saveGenPoke
+      }
+    },
+    comebackNormal() {
+      this.allGenPokemon = this.saveGenPoke
     },
     checkHandler() {
       if (this.selectedTypes.length > 2) {
@@ -88,12 +98,19 @@ export default {
     }
   },
   async beforeMount() {
-    this.allGenPokemon = await getPokemonsOfGeneration(this.idGen)
+    this.saveGenPoke = await getPokemonsOfGeneration(this.idGen)
+    this.allGenPokemon = this.saveGenPoke
     this.types = await getTypesOfIdPokeGen(this.allGenPokemon)
   }
 }
 </script>
 <style scoped>
+.backNormal{
+  position: fixed;
+  right: 45%;
+  bottom: 5%;
+  background: transparent;
+}
 .loadTypes {
   left: 70px;
   top: 610px;
