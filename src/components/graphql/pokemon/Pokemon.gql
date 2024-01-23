@@ -1,0 +1,12 @@
+query getPokemon($name: String) {
+  getPokemon(name: $name) {
+    id
+    name
+    base_experience
+    height
+    is_default
+    order
+    weight
+    image
+  }
+}

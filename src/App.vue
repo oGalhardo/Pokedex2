@@ -1,10 +1,6 @@
 <template>
-  <pokedex-vue />
+  <PokedexVue />
 </template>
-<script>
+<script setup lang="ts">
 import PokedexVue from './components/PokedexVue.vue'
-export default {
-  components: { PokedexVue },
-  name: 'App'
-}
 </script>
