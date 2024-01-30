@@ -5,9 +5,10 @@
 </template>
 
 <script setup lang="ts">
+import { watchEffect } from 'vue'
 import { apolloClient } from '../../modules/query'
 import getPokemon from '../graphql/pokemon/Pokemon.gql'
-const emits = defineEmits(['envityImg'])
+const emits = defineEmits(['envityPokeofSearchButton'])
 const props = defineProps({
   pokemonName: {
     type: String,
@@ -23,11 +24,16 @@ async function fetchPokemon() {
         name: props.pokemonName
       }
     })
-    emits('envityImg', data.getPokemon.image)
+    emits('envityPokeofSearchButton', data.getPokemon)
   } catch (error) {
     console.error('Error fetching Pokemon:', error)
   }
 }
+watchEffect(() => {
+  if (props.pokemonName) {
+    fetchPokemon()
+  }
+})
 </script>
 
 <style scoped>

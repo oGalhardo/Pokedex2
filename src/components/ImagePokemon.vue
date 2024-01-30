@@ -1,5 +1,8 @@
 <template>
-  <img v-if="imgPoke" :src="props.imgPoke" class="sprite" />
+  <q-avatar class="sprite" size="100px">
+    <div v-show="props.imgPoke"><img :src="props.imgPoke" /></div>
+  </q-avatar>
+
 </template>
 
 <script setup lang="ts">
@@ -13,7 +16,6 @@ const props = defineProps({
 
 <style scoped>
 .sprite {
-  height: 200px;
-  width: 200px;
+  border: none;
 }
 </style>

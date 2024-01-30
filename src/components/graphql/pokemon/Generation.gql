@@ -1,0 +1,6 @@
+query getGeneration($generation: Int) {
+  getGeneration(generation: $generation) {
+    name
+    image
+  }
+}

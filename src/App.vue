@@ -1,6 +1,8 @@
 <template>
-  <PokedexVue />
+  <div>
+    <router-view />
+  </div>
 </template>
 <script setup lang="ts">
-import PokedexVue from './components/PokedexVue.vue'
+import { RouterView } from 'vue-router'
 </script>

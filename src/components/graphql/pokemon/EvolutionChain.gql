@@ -1,5 +1,5 @@
-query getPokemon($name: String) {
-  getPokemon(name: $name) {
+query getEvo($name: String, $option: String) {
+  getEvo(name: $name, option:$option) {
     id
     name
     base_experience
@@ -8,6 +8,5 @@ query getPokemon($name: String) {
     order
     weight
     image
-    type
   }
 }
