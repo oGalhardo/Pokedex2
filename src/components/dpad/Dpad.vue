@@ -31,7 +31,6 @@ const props = defineProps({
   }
 })
 const handleEnvityImg = (pok: object) => {
-  console.log(pok)
   emits('envityPoke', pok)
 }
 </script>
